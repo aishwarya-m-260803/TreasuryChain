@@ -1,0 +1,12 @@
+# Backend
+backend/node_modules/
+backend/.env
+backend/wallet/
+
+# Hyperledger generated artifacts
+network/organizations/
+network/system-genesis-block/
+network/channel-artifacts/
+
+# Logs
+*.log

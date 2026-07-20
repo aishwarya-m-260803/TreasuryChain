@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+
+  ca_finance:
+    image: hyperledger/fabric-ca:1.5.17
+    container_name: ca_finance
+
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=FinanceCA
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+
+    ports:
+      - "7054:7054"
+
+    command: fabric-ca-server start -b admin:adminpw -d
+
+    volumes:
+      - ../organizations/fabric-ca/finance:/etc/hyperledger/fabric-ca-server
+
+    networks:
+      - treasury
+    
+    
+
+  ca_trustee:
+    image: hyperledger/fabric-ca:1.5.17
+    container_name: ca_trustee
+
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=TrusteeCA
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+
+    ports:
+      - "8054:7054"
+
+    command: fabric-ca-server start -b admin:adminpw -d
+
+    volumes:
+      - ../organizations/fabric-ca/trustee:/etc/hyperledger/fabric-ca-server
+
+    networks:
+      - treasury
+
+  ca_operations:
+    image: hyperledger/fabric-ca:1.5.17
+    container_name: ca_operations
+
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=OperationsCA
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+
+    ports:
+      - "9054:7054"
+
+    command: fabric-ca-server start -b admin:adminpw -d
+
+    volumes:
+      - ../organizations/fabric-ca/operations:/etc/hyperledger/fabric-ca-server
+
+    networks:
+      - treasury
+
+  ca_audit:
+    image: hyperledger/fabric-ca:1.5.17
+    container_name: ca_audit
+
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=AuditCA
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+
+    ports:
+      - "10054:7054"
+
+    command: fabric-ca-server start -b admin:adminpw -d
+
+    volumes:
+      - ../organizations/fabric-ca/audit:/etc/hyperledger/fabric-ca-server
+
+    networks:
+      - treasury
+
+
+  ca_orderer:
+    image: hyperledger/fabric-ca:1.5.17
+    container_name: ca_orderer
+
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=OrdererCA
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+
+    ports:
+      - "11054:7054"
+
+    command: fabric-ca-server start -b admin:adminpw -d
+
+    volumes:
+      - ../organizations/fabric-ca/ordererOrg:/etc/hyperledger/fabric-ca-server
+
+    networks:
+      - treasury
+
+networks:
+
+  treasury:
+    driver: bridge
