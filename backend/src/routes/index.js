@@ -19,6 +19,10 @@ router.get('/health', (req, res) => {
     res.json({ status: "Healthy" });
 });
 
+// Auth endpoints
+const authRoutes = require('./authRoutes');
+router.use('/api/auth', authRoutes);
+
 // Treasury endpoints
 const treasuryRoutes = require('./treasuryRoutes');
 router.use('/api/treasury', treasuryRoutes);

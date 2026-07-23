@@ -2,11 +2,10 @@ const treasuryService = require('../services/treasuryService');
 
 /**
  * Controller to handle the GetDashboardSummary request.
- * It is decoupled from Fabric logic and only handles HTTP request/response formatting.
  */
 async function getSummary(req, res) {
     try {
-        const summary = await treasuryService.getDashboardSummary();
+        const summary = await treasuryService.getDashboardSummary(req.fabricConfig);
         res.status(200).json({
             success: true,
             data: summary
@@ -22,13 +21,11 @@ async function getSummary(req, res) {
 
 /**
  * Controller to handle the CreateProposal request.
- * Validates request payload and passes the parameters to the service layer.
  */
 async function createProposal(req, res) {
     try {
         const { amount, purpose } = req.body;
 
-        // Perform basic input validation
         if (amount === undefined || amount === null) {
             return res.status(400).json({
                 success: false,
@@ -51,8 +48,7 @@ async function createProposal(req, res) {
             });
         }
 
-        // Call the service with amount formatted as string (chaincode requirements)
-        const proposal = await treasuryService.createProposal(parsedAmount.toString(), purpose.trim());
+        const proposal = await treasuryService.createProposal(req.fabricConfig, parsedAmount.toString(), purpose.trim());
 
         res.status(201).json({
             success: true,
@@ -69,14 +65,12 @@ async function createProposal(req, res) {
 
 /**
  * Controller to handle the VoteOnProposal request.
- * Validates request payload and passes the parameters to the service layer.
  */
 async function voteProposal(req, res) {
     try {
         const { id } = req.params;
         const { vote } = req.body;
 
-        // Perform basic input validation
         if (!id || id.trim() === '') {
             return res.status(400).json({
                 success: false,
@@ -91,8 +85,7 @@ async function voteProposal(req, res) {
             });
         }
 
-        // Call the service
-        const updatedProposal = await treasuryService.voteOnProposal(id.trim(), vote);
+        const updatedProposal = await treasuryService.voteOnProposal(req.fabricConfig, id.trim(), vote);
 
         res.status(200).json({
             success: true,
@@ -109,13 +102,11 @@ async function voteProposal(req, res) {
 
 /**
  * Controller to handle the GetProposalById (QueryProposal) request.
- * Validates request payload and passes the parameters to the service layer.
  */
 async function getProposal(req, res) {
     try {
         const { id } = req.params;
 
-        // Perform basic input validation
         if (!id || id.trim() === '') {
             return res.status(400).json({
                 success: false,
@@ -123,8 +114,7 @@ async function getProposal(req, res) {
             });
         }
 
-        // Call the service
-        const proposal = await treasuryService.getProposalById(id.trim());
+        const proposal = await treasuryService.getProposalById(req.fabricConfig, id.trim());
 
         res.status(200).json({
             success: true,
@@ -141,7 +131,6 @@ async function getProposal(req, res) {
 
 /**
  * Controller to handle the QueryAllProposals and status-filtered query requests.
- * Invokes the service layer and returns proposals from the ledger.
  */
 async function listProposals(req, res) {
     try {
@@ -156,9 +145,9 @@ async function listProposals(req, res) {
                     message: 'Invalid status filter. Must be PENDING, APPROVED, or REJECTED.'
                 });
             }
-            proposals = await treasuryService.listProposalsByStatus(upperStatus);
+            proposals = await treasuryService.listProposalsByStatus(req.fabricConfig, upperStatus);
         } else {
-            proposals = await treasuryService.listAllProposals();
+            proposals = await treasuryService.listAllProposals(req.fabricConfig);
         }
 
         res.status(200).json({
@@ -176,11 +165,10 @@ async function listProposals(req, res) {
 
 /**
  * Controller to handle the QueryReserve request.
- * Invokes the service layer and returns the treasury reserve balance.
  */
 async function getReserve(req, res) {
     try {
-        const reserve = await treasuryService.getReserveDetails();
+        const reserve = await treasuryService.getReserveDetails(req.fabricConfig);
         res.status(200).json({
             success: true,
             data: reserve
@@ -196,11 +184,10 @@ async function getReserve(req, res) {
 
 /**
  * Controller to handle the QueryAllExpenses request.
- * Invokes the service layer and returns all expense records from the ledger.
  */
 async function getExpenses(req, res) {
     try {
-        const expenses = await treasuryService.listExpenses();
+        const expenses = await treasuryService.listExpenses(req.fabricConfig);
         res.status(200).json({
             success: true,
             data: expenses
@@ -216,11 +203,10 @@ async function getExpenses(req, res) {
 
 /**
  * Controller to handle the QueryAuditLogs request.
- * Invokes the service layer and returns all audit logs from the ledger.
  */
 async function getAuditLogs(req, res) {
     try {
-        const auditLogs = await treasuryService.listAuditLogs();
+        const auditLogs = await treasuryService.listAuditLogs(req.fabricConfig);
         res.status(200).json({
             success: true,
             data: auditLogs
@@ -236,13 +222,11 @@ async function getAuditLogs(req, res) {
 
 /**
  * Controller to handle the GetProposalHistory request.
- * Validates request parameters and passes the ID to the service layer.
  */
 async function getProposalHistory(req, res) {
     try {
         const { id } = req.params;
 
-        // Perform basic input validation
         if (!id || id.trim() === '') {
             return res.status(400).json({
                 success: false,
@@ -250,8 +234,7 @@ async function getProposalHistory(req, res) {
             });
         }
 
-        // Call the service
-        const history = await treasuryService.getProposalHistory(id.trim());
+        const history = await treasuryService.getProposalHistory(req.fabricConfig, id.trim());
 
         res.status(200).json({
             success: true,

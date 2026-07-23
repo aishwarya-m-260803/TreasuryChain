@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const treasuryController = require('../controllers/treasuryController');
+const authMiddleware = require('../middleware/authMiddleware');
+
+// Apply authentication middleware to all treasury routes
+router.use(authMiddleware);
 
 // GET /api/treasury/summary - Read-only query to get ledger stats
 router.get('/summary', treasuryController.getSummary);
