@@ -79,7 +79,7 @@ class TreasuryContract extends Contract {
             purpose: purpose,
             status: 'PENDING',
             transactionId: ctx.stub.getTxID(),
-            timestamp: new Date().toISOString()
+            timestamp: this._getTxTimestampIso(ctx)
         };
         ctx.stub.setEvent('ProposalCreated', Buffer.from(JSON.stringify(eventPayload)));
 
@@ -112,7 +112,7 @@ class TreasuryContract extends Contract {
         proposal.voteDetails = proposal.voteDetails || {};
         proposal.voteDetails[orgId] = {
             vote: vote,
-            timestamp: new Date().toISOString(),
+            timestamp: this._getTxTimestampIso(ctx),
             txId: ctx.stub.getTxID()
         };
 
@@ -124,7 +124,7 @@ class TreasuryContract extends Contract {
                 status: 'REJECTED',
                 organization: orgId,
                 transactionId: ctx.stub.getTxID(),
-                timestamp: new Date().toISOString()
+                timestamp: this._getTxTimestampIso(ctx)
             };
             ctx.stub.setEvent('ProposalRejected', Buffer.from(JSON.stringify(eventPayload)));
         } else {
@@ -136,7 +136,7 @@ class TreasuryContract extends Contract {
                     proposalId: proposalId,
                     status: 'APPROVED',
                     transactionId: ctx.stub.getTxID(),
-                    timestamp: new Date().toISOString()
+                    timestamp: this._getTxTimestampIso(ctx)
                 };
                 ctx.stub.setEvent('ProposalApproved', Buffer.from(JSON.stringify(eventPayload)));
                 await this._processApprovedProposal(ctx, proposal);
@@ -169,7 +169,7 @@ class TreasuryContract extends Contract {
             proposalId: proposal.proposalId,
             amount: proposal.amount,
             purpose: proposal.purpose,
-            timestamp: new Date().toISOString()
+            timestamp: this._getTxTimestampIso(ctx)
         };
         const expenseKey = `EXPENSE_${proposal.proposalId}`;
         await ctx.stub.putState(expenseKey, Buffer.from(JSON.stringify(expenseRecord)));
@@ -298,7 +298,7 @@ class TreasuryContract extends Contract {
     }
 
     async _createAuditLog(ctx, eventType, proposalId, details) {
-        const timestamp = new Date().toISOString();
+        const timestamp = this._getTxTimestampIso(ctx);
         const txId = ctx.stub.getTxID();
         let orgId = 'SYSTEM';
         try {
@@ -388,22 +388,30 @@ class TreasuryContract extends Contract {
     async GetProposalHistory(ctx, proposalId) {
         const iterator = await ctx.stub.getHistoryForKey(proposalId);
         const allResults = [];
-        for await (const res of iterator) {
-            const result = {
-                txId: res.txId,
-                timestamp: res.timestamp,
-                isDelete: res.isDelete
-            };
-            if (res.isDelete) {
-                result.state = null;
-            } else {
-                try {
-                    result.state = JSON.parse(res.value.toString('utf8'));
-                } catch (err) {
-                    result.state = res.value.toString('utf8');
+        while (true) {
+            const res = await iterator.next();
+            if (res.value) {
+                const valueObj = res.value;
+                const result = {
+                    txId: valueObj.txId,
+                    timestamp: valueObj.timestamp,
+                    isDelete: valueObj.isDelete
+                };
+                if (valueObj.isDelete) {
+                    result.state = null;
+                } else {
+                    try {
+                        result.state = JSON.parse(valueObj.value.toString('utf8'));
+                    } catch (err) {
+                        result.state = valueObj.value.toString('utf8');
+                    }
                 }
+                allResults.push(result);
             }
-            allResults.push(result);
+            if (res.done) {
+                await iterator.close();
+                break;
+            }
         }
         return JSON.stringify(allResults);
     }
@@ -411,6 +419,11 @@ class TreasuryContract extends Contract {
     async ProposalExists(ctx, proposalId) {
         const proposalBytes = await ctx.stub.getState(proposalId);
         return proposalBytes && proposalBytes.length > 0;
+    }
+
+    _getTxTimestampIso(ctx) {
+        const txTimestamp = ctx.stub.getTxTimestamp();
+        return new Date(txTimestamp.seconds * 1000 + Math.floor(txTimestamp.nanos / 1000000)).toISOString();
     }
 
     async _getProposal(ctx, proposalId) {

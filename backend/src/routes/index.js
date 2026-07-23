@@ -19,4 +19,8 @@ router.get('/health', (req, res) => {
     res.json({ status: "Healthy" });
 });
 
+// Treasury endpoints
+const treasuryRoutes = require('./treasuryRoutes');
+router.use('/api/treasury', treasuryRoutes);
+
 module.exports = router;
