@@ -23,22 +23,6 @@ function PlaceholderView({ title, description, icon: Icon }) {
     );
 }
 
-export function ReserveView() {
-    return <PlaceholderView 
-        title="Treasury Reserve" 
-        description="View the current state of the treasury reserve and active allocations." 
-        icon={Landmark} 
-    />;
-}
-
-export function ExpensesView() {
-    return <PlaceholderView 
-        title="Expense Tracking" 
-        description="Track and audit completed payouts from approved proposals." 
-        icon={Receipt} 
-    />;
-}
-
 export function AuditLogsView() {
     return <PlaceholderView 
         title="Audit Logs" 

@@ -7,9 +7,10 @@ import { ProposalsView } from './pages/dashboard/ProposalsView';
 import { ProposalDetails } from './pages/dashboard/ProposalDetails';
 import { VotingView } from './pages/dashboard/VotingView';
 import { VotingDetails } from './pages/dashboard/VotingDetails';
+import { ReserveView } from './pages/dashboard/ReserveView';
+import { ExpensesView } from './pages/dashboard/ExpensesView';
+import { ExpenseDetails } from './pages/dashboard/ExpenseDetails';
 import { 
-    ReserveView, 
-    ExpensesView, 
     AuditLogsView, 
     HistoryView 
 } from './pages/dashboard/PlaceholderViews';
@@ -50,6 +51,7 @@ function App() {
                     <Route path="voting/:id" element={<VotingDetails />} />
                     <Route path="reserve" element={<ReserveView />} />
                     <Route path="expenses" element={<ExpensesView />} />
+                    <Route path="expenses/:id" element={<ExpenseDetails />} />
                     <Route path="audit" element={<AuditLogsView />} />
                     <Route path="history" element={<HistoryView />} />
                 </Route>
