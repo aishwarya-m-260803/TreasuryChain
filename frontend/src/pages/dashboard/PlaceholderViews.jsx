@@ -23,14 +23,6 @@ function PlaceholderView({ title, description, icon: Icon }) {
     );
 }
 
-export function AuditLogsView() {
-    return <PlaceholderView 
-        title="Audit Logs" 
-        description="Review the immutable audit trail of all actions performed on the TreasuryChain network." 
-        icon={ShieldCheck} 
-    />;
-}
-
 export function HistoryView() {
     return <PlaceholderView 
         title="Proposal History" 

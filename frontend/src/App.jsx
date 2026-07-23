@@ -10,8 +10,9 @@ import { VotingDetails } from './pages/dashboard/VotingDetails';
 import { ReserveView } from './pages/dashboard/ReserveView';
 import { ExpensesView } from './pages/dashboard/ExpensesView';
 import { ExpenseDetails } from './pages/dashboard/ExpenseDetails';
+import { AuditLogsView } from './pages/dashboard/AuditLogsView';
+import { AuditLogDetails } from './pages/dashboard/AuditLogDetails';
 import { 
-    AuditLogsView, 
     HistoryView 
 } from './pages/dashboard/PlaceholderViews';
 import { useAuth } from './context/AuthContext';
@@ -53,6 +54,7 @@ function App() {
                     <Route path="expenses" element={<ExpensesView />} />
                     <Route path="expenses/:id" element={<ExpenseDetails />} />
                     <Route path="audit" element={<AuditLogsView />} />
+                    <Route path="audit/:id" element={<AuditLogDetails />} />
                     <Route path="history" element={<HistoryView />} />
                 </Route>
                 
