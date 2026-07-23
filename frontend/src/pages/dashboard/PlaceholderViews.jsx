@@ -23,10 +23,4 @@ function PlaceholderView({ title, description, icon: Icon }) {
     );
 }
 
-export function HistoryView() {
-    return <PlaceholderView 
-        title="Proposal History" 
-        description="Trace the complete lifecycle of a proposal from creation to final execution." 
-        icon={FileSearch} 
-    />;
-}
+// No more placeholder views needed. All modules are fully implemented!

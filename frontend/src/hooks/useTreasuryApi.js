@@ -63,6 +63,10 @@ export function useTreasuryApi() {
         );
     }, []);
 
+    const getProposalHistory = useCallback((id) => {
+        return handleRequest(() => api.get(`/treasury/proposals/${id}/history`));
+    }, []);
+
     return {
         isLoading,
         error,
@@ -73,6 +77,7 @@ export function useTreasuryApi() {
         getAuditLogs,
         createProposal,
         getProposalById,
-        voteOnProposal
+        voteOnProposal,
+        getProposalHistory
     };
 }

@@ -12,9 +12,8 @@ import { ExpensesView } from './pages/dashboard/ExpensesView';
 import { ExpenseDetails } from './pages/dashboard/ExpenseDetails';
 import { AuditLogsView } from './pages/dashboard/AuditLogsView';
 import { AuditLogDetails } from './pages/dashboard/AuditLogDetails';
-import { 
-    HistoryView 
-} from './pages/dashboard/PlaceholderViews';
+import { HistoryView } from './pages/dashboard/HistoryView';
+import { HistoryDetails } from './pages/dashboard/HistoryDetails';
 import { useAuth } from './context/AuthContext';
 import { Toaster } from './components/ui/toast';
 
@@ -56,6 +55,7 @@ function App() {
                     <Route path="audit" element={<AuditLogsView />} />
                     <Route path="audit/:id" element={<AuditLogDetails />} />
                     <Route path="history" element={<HistoryView />} />
+                    <Route path="history/:id" element={<HistoryDetails />} />
                 </Route>
                 
                 {/* Fallback route */}
