@@ -1,2 +1,2 @@
 Committed chaincode definition for chaincode 'treasury' on channel 'mychannel':
-Version: 4.0, Sequence: 4, Endorsement Plugin: escc, Validation Plugin: vscc, Approvals: [AuditMSP: true, FinanceMSP: true, OperationsMSP: true, TrusteeMSP: true]
+Version: 1.0, Sequence: 1, Endorsement Plugin: escc, Validation Plugin: vscc, Approvals: [AuditMSP: true, FinanceMSP: true, OperationsMSP: true, TrusteeMSP: true]

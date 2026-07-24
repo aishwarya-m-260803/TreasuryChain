@@ -1,4 +1,5 @@
 const treasuryService = require('../services/treasuryService');
+const fabricConfig = require('../config/fabricConfig');
 
 /**
  * Controller to handle the GetDashboardSummary request.
@@ -249,6 +250,27 @@ async function getProposalHistory(req, res) {
     }
 }
 
+/**
+ * Controller to return network configuration metadata (channel, chaincode).
+ */
+async function getNetworkConfig(req, res) {
+    try {
+        res.status(200).json({
+            success: true,
+            data: {
+                channelName: fabricConfig.channelName,
+                chaincodeName: fabricConfig.chaincodeName
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'An error occurred while fetching network configuration.',
+            error: error.message
+        });
+    }
+}
+
 module.exports = {
     getSummary,
     createProposal,
@@ -258,5 +280,6 @@ module.exports = {
     getReserve,
     getExpenses,
     getAuditLogs,
-    getProposalHistory
+    getProposalHistory,
+    getNetworkConfig
 };

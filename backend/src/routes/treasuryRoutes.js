@@ -33,4 +33,7 @@ router.get('/audit-logs', treasuryController.getAuditLogs);
 // GET /api/treasury/proposals/:id/history - Read-only query to fetch proposal state history
 router.get('/proposals/:id/history', treasuryController.getProposalHistory);
 
+// GET /api/treasury/network-config - Returns network metadata (channel, chaincode)
+router.get('/network-config', treasuryController.getNetworkConfig);
+
 module.exports = router;

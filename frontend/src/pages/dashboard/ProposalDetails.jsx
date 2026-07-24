@@ -132,17 +132,55 @@ export function ProposalDetails() {
                         </div>
                     </GlassCard>
 
-                    {/* Voting History Placeholder */}
-                    <GlassCard className="p-8 border-dashed border-white/10">
-                        <div className="flex flex-col items-center justify-center py-8 text-center">
-                            <div className="p-3 bg-white/5 rounded-full mb-4">
-                                <Hammer className="h-6 w-6 text-muted-foreground" />
+                    {/* Voting History */}
+                    <GlassCard className="p-8">
+                        <SectionTitle className="text-xl mb-6 flex items-center gap-2">
+                            <Hammer className="h-5 w-5 text-primary" />
+                            Voting History
+                        </SectionTitle>
+
+                        {proposal.voteDetails && Object.keys(proposal.voteDetails).length > 0 ? (
+                            <div className="space-y-4">
+                                {Object.entries(proposal.voteDetails).map(([org, detail]) => (
+                                    <div key={org} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white/5 border border-white/10 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2 rounded-full ${detail.vote === 'APPROVE' ? 'bg-emerald-500/10' : 'bg-destructive/10'}`}>
+                                                {detail.vote === 'APPROVE'
+                                                    ? <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                                                    : <XCircle className="h-4 w-4 text-destructive" />
+                                                }
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-medium text-white">{org.replace('MSP', '')}</div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {detail.timestamp
+                                                        ? new Date(detail.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                                                        : 'N/A'
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 sm:text-right">
+                                            <Badge variant={detail.vote === 'APPROVE' ? 'success' : 'destructive'}>
+                                                {detail.vote}
+                                            </Badge>
+                                            {detail.txId && (
+                                                <span className="text-[10px] font-mono text-muted-foreground hidden sm:inline" title={detail.txId}>
+                                                    Tx: {detail.txId.substring(0, 8)}…
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                            <h3 className="text-lg font-medium text-white mb-2">Voting History</h3>
-                            <p className="text-sm text-muted-foreground max-w-md">
-                                The decentralized voting timeline and consensus signatures will be displayed here in a future milestone.
-                            </p>
-                        </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                                <div className="p-3 bg-white/5 rounded-full mb-4">
+                                    <Hammer className="h-6 w-6 text-muted-foreground" />
+                                </div>
+                                <p className="text-sm text-muted-foreground">No votes have been cast on this proposal yet.</p>
+                            </div>
+                        )}
                     </GlassCard>
                 </div>
 

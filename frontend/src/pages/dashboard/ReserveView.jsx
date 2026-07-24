@@ -184,18 +184,31 @@ export function ReserveView() {
                         <SectionTitle className="text-lg mb-6">Activity Timeline</SectionTitle>
                         
                         <div className="relative border-l border-white/10 ml-3 space-y-8 py-2">
-                            {/* Placeholder UI for Timeline */}
-                            <div className="relative pl-6">
-                                <div className="absolute w-3 h-3 bg-primary rounded-full -left-[6.5px] top-1.5 shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)]" />
-                                <div className="mb-1 text-sm font-medium text-white">Treasury Initialized</div>
-                                <div className="text-xs text-muted-foreground">Network genesis block created. Initial allocation mapped.</div>
-                            </div>
-
-                            <div className="relative pl-6 opacity-50">
-                                <div className="absolute w-3 h-3 bg-white/20 rounded-full -left-[6.5px] top-1.5" />
-                                <div className="mb-1 text-sm font-medium text-white">Awaiting First Disbursement</div>
-                                <div className="text-xs text-muted-foreground">No funds have been approved for release yet.</div>
-                            </div>
+                            {expenses.length > 0 ? (
+                                [...expenses]
+                                    .sort((a, b) => new Date(b.Record.timestamp || b.Record.date) - new Date(a.Record.timestamp || a.Record.date))
+                                    .slice(0, 5)
+                                    .map((exp, index) => (
+                                        <div key={exp.Key} className="relative pl-6">
+                                            <div className={`absolute w-3 h-3 rounded-full -left-[6.5px] top-1.5 ${index === 0 ? 'bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)]' : 'bg-white/20'}`} />
+                                            <div className="mb-1 text-sm font-medium text-white">
+                                                Disbursed {formatCurrency(exp.Record.amount)}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {exp.Record.purpose || exp.Record.proposalId}
+                                            </div>
+                                            <div className="text-[10px] text-muted-foreground/60 mt-1">
+                                                {formatDate(exp.Record.timestamp || exp.Record.date)}
+                                            </div>
+                                        </div>
+                                    ))
+                            ) : (
+                                <div className="relative pl-6 opacity-50">
+                                    <div className="absolute w-3 h-3 bg-white/20 rounded-full -left-[6.5px] top-1.5" />
+                                    <div className="mb-1 text-sm font-medium text-white">No Reserve Activity</div>
+                                    <div className="text-xs text-muted-foreground">No funds have been disbursed from the treasury yet.</div>
+                                </div>
+                            )}
                         </div>
                     </GlassCard>
                 </div>

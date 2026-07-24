@@ -67,6 +67,10 @@ export function useTreasuryApi() {
         return handleRequest(() => api.get(`/treasury/proposals/${id}/history`));
     }, []);
 
+    const getNetworkConfig = useCallback(() => {
+        return handleRequest(() => api.get('/treasury/network-config'));
+    }, []);
+
     return {
         isLoading,
         error,
@@ -78,6 +82,7 @@ export function useTreasuryApi() {
         createProposal,
         getProposalById,
         voteOnProposal,
-        getProposalHistory
+        getProposalHistory,
+        getNetworkConfig
     };
 }

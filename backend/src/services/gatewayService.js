@@ -15,12 +15,15 @@ const connections = {};
  * from any enrolled identity.
  */
 async function newGrpcConnection(orgFabricConfig) {
-    // Read the connection profile from the environment (defaulting to Finance profile)
-    const profileContent = await fs.readFile(fabricConfig.connectionProfile, 'utf8');
+    // Resolve the organization's connection profile path dynamically based on orgDomain
+    // orgFabricConfig has orgDomain (e.g., finance.treasurychain.com)
+    // The profile is located at: ../network/organizations/peerOrganizations/<orgDomain>/connection-<orgName>.json
+    const orgName = orgFabricConfig.orgDomain.split('.')[0];
+    const profilePath = path.resolve(__dirname, '../../../network/organizations/peerOrganizations', orgFabricConfig.orgDomain, `connection-${orgName}.json`);
+    
+    const profileContent = await fs.readFile(profilePath, 'utf8');
     const profile = JSON.parse(profileContent);
-
-    // We'll use the finance peer as the gateway for all organizations in this demo
-    const peerName = 'peer0.finance.treasurychain.com';
+    const peerName = orgFabricConfig.peerName;
     const peer = profile.peers[peerName];
     let tlsRootCert;
     if (Array.isArray(peer.tlsCACerts.pem)) {

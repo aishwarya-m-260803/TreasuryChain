@@ -12,17 +12,22 @@ import { ArrowLeft, Loader2, XCircle, ShieldCheck, ArrowUpRight, Database, Hash,
 export function AuditLogDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { getAuditLogs, isLoading } = useTreasuryApi();
+    const { getAuditLogs, getNetworkConfig, isLoading } = useTreasuryApi();
     
     const [auditLog, setAuditLog] = useState(null);
+    const [networkConfig, setNetworkConfig] = useState(null);
     const [error, setError] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
         
         async function fetchAuditDetails() {
-            const logsList = await getAuditLogs();
+            const [logsList, config] = await Promise.all([
+                getAuditLogs(),
+                getNetworkConfig()
+            ]);
             if (isMounted) {
+                if (config) setNetworkConfig(config);
                 if (logsList) {
                     const found = logsList.find(l => l.Key === id);
                     if (found) {
@@ -39,7 +44,7 @@ export function AuditLogDetails() {
         fetchAuditDetails();
         
         return () => { isMounted = false; };
-    }, [id, getAuditLogs]);
+    }, [id, getAuditLogs, getNetworkConfig]);
 
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
@@ -160,17 +165,17 @@ export function AuditLogDetails() {
                             </div>
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-white/5">
                                 <span className="text-sm text-muted-foreground w-32 shrink-0">Channel</span>
-                                <span className="text-sm font-mono text-white text-right">treasury-channel</span>
+                                <span className="text-sm font-mono text-white text-right">{networkConfig?.channelName || 'Not Available'}</span>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-white/5">
                                 <span className="text-sm text-muted-foreground w-32 shrink-0">Chaincode</span>
-                                <span className="text-sm font-mono text-white text-right">treasurycc</span>
+                                <span className="text-sm font-mono text-white text-right">{networkConfig?.chaincodeName || 'Not Available'}</span>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2">
                                 <span className="text-sm text-muted-foreground w-32 shrink-0 flex items-center gap-2">
                                     <FileJson className="h-4 w-4" /> Raw State
                                 </span>
-                                <span className="text-xs font-mono text-muted-foreground truncate text-right">Encrypted / Off-chain payload omitted</span>
+                                <pre className="text-xs font-mono text-muted-foreground text-right max-w-[280px] overflow-x-auto whitespace-pre-wrap break-all">{JSON.stringify(Record, null, 2)}</pre>
                             </div>
                         </div>
                     </GlassCard>

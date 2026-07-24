@@ -10,6 +10,7 @@ import { Landmark, FileText, CheckCircle2, Clock, ShieldCheck, Receipt, ArrowRig
 import { Grid } from '../../components/layout/Grid';
 import { Stack } from '../../components/layout/Stack';
 import { Link } from 'react-router-dom';
+import { CreateProposalModal } from './components/CreateProposalModal';
 
 export function DashboardOverview() {
     const { user } = useAuth();
@@ -17,11 +18,21 @@ export function DashboardOverview() {
     
     const [summary, setSummary] = useState(null);
     const [proposals, setProposals] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const fetchData = async () => {
+        const [summaryData, proposalsData] = await Promise.all([
+            getSummary(),
+            getProposals()
+        ]);
+        if (summaryData) setSummary(summaryData);
+        if (proposalsData) setProposals(proposalsData);
+    };
 
     useEffect(() => {
         let isMounted = true;
         
-        async function fetchData() {
+        async function load() {
             const [summaryData, proposalsData] = await Promise.all([
                 getSummary(),
                 getProposals()
@@ -33,7 +44,7 @@ export function DashboardOverview() {
             }
         }
         
-        fetchData();
+        load();
         
         return () => { isMounted = false; };
     }, [getSummary, getProposals]);
@@ -79,7 +90,7 @@ export function DashboardOverview() {
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" onClick={() => setIsModalOpen(true)} className="gap-2">
                         <FileText className="h-4 w-4" />
                         Create Proposal
                     </Button>
@@ -229,6 +240,15 @@ export function DashboardOverview() {
                     </div>
                 </div>
             </Grid>
+
+            <CreateProposalModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                onSuccess={() => {
+                    setIsModalOpen(false);
+                    fetchData();
+                }} 
+            />
         </div>
     );
 }

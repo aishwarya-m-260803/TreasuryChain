@@ -30,6 +30,7 @@ if command -v ${CONTAINER_CLI}-compose > /dev/null 2>&1; then
 else
     : ${CONTAINER_CLI_COMPOSE:="${CONTAINER_CLI} compose"}
 fi
+: ${DOCKER_SOCK:="/var/run/docker.sock"}
 infoln "Using ${CONTAINER_CLI} and ${CONTAINER_CLI_COMPOSE}"
 
 # Obtain CONTAINER_IDS and remove them
