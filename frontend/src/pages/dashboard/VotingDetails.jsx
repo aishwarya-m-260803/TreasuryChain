@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTreasuryApi } from '../../hooks/useTreasuryApi';
 import { GlassCard } from '../../components/ui/card';
@@ -14,8 +14,11 @@ import { ArrowLeft, Loader2, XCircle, Hammer, Check, X, CheckCircle2, Clock } fr
 export function VotingDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const isFunding = searchParams.get('type') === 'funding';
+    
     const { user } = useAuth();
-    const { getProposalById, voteOnProposal, isLoading } = useTreasuryApi();
+    const { getProposalById, voteOnProposal, getFundingProposalById, voteOnFundingProposal, isLoading } = useTreasuryApi();
     
     const [proposal, setProposal] = useState(null);
     const [error, setError] = useState(false);
@@ -28,7 +31,7 @@ export function VotingDetails() {
     const [voteError, setVoteError] = useState(null);
 
     const fetchProposal = async () => {
-        const data = await getProposalById(id);
+        const data = isFunding ? await getFundingProposalById(id) : await getProposalById(id);
         if (data) {
             setProposal(data);
         } else {
@@ -39,7 +42,7 @@ export function VotingDetails() {
     useEffect(() => {
         fetchProposal();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id]);
+    }, [id, isFunding]);
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
@@ -56,7 +59,10 @@ export function VotingDetails() {
         setVoteError(null);
         setVoteSuccess(null);
 
-        const success = await voteOnProposal(id, selectedVote);
+        const success = isFunding 
+            ? await voteOnFundingProposal(id, selectedVote) 
+            : await voteOnProposal(id, selectedVote);
+            
         if (success) {
             setModalOpen(false);
             const actionText = selectedVote === 'APPROVE' ? 'approval' : 'rejection';
@@ -67,7 +73,7 @@ export function VotingDetails() {
             
             // Wait 2.5 seconds, then redirect
             setTimeout(() => {
-                navigate('/dashboard/voting');
+                navigate(isFunding ? '/dashboard/funding' : '/dashboard/voting');
             }, 2500);
         } else {
             setModalOpen(false);
@@ -96,8 +102,8 @@ export function VotingDetails() {
                     <p className="text-muted-foreground text-sm mb-6">
                         The proposal {id} could not be found.
                     </p>
-                    <Button variant="outline" onClick={() => navigate('/dashboard/voting')}>
-                        Back to Voting
+                    <Button variant="outline" onClick={() => navigate(isFunding ? '/dashboard/funding' : '/dashboard/voting')}>
+                        Back to {isFunding ? 'Funding' : 'Voting'}
                     </Button>
                 </GlassCard>
             </div>
@@ -108,12 +114,12 @@ export function VotingDetails() {
     const hasVoted = proposal.votedOrgs?.includes(user.mspId);
     
     // Determine if proposal is still pending
-    const isPending = proposal.status === 'PENDING';
+    const isPending = proposal.status?.toUpperCase() === 'PENDING';
 
     const parseProposalPurpose = (purposeStr) => {
         if (!purposeStr) return {
             isStructured: false,
-            title: 'Funding Proposal Request',
+            title: 'Proposal Request',
             category: 'N/A',
             priority: 'Medium',
             requiredByDate: 'N/A',
@@ -166,7 +172,7 @@ export function VotingDetails() {
 
         return {
             isStructured: false,
-            title: 'Funding Proposal Request',
+            title: 'Proposal Request',
             category: 'N/A',
             priority: 'Medium',
             requiredByDate: 'N/A',
@@ -178,15 +184,30 @@ export function VotingDetails() {
         };
     };
 
-    const details = parseProposalPurpose(proposal.purpose);
     const formatOrgName = (org) => {
         if (!org || org === 'N/A') return 'N/A';
         return org.charAt(0).toUpperCase() + org.slice(1);
     };
 
+    const details = isFunding ? {
+        isStructured: true,
+        title: proposal.reason || 'Funding Proposal',
+        category: proposal.source || 'N/A',
+        priority: 'Medium',
+        requiredByDate: 'N/A',
+        submittedBy: proposal.organization ? formatOrgName(proposal.organization) : 'N/A',
+        organization: proposal.organization || 'N/A',
+        submissionDate: proposal.createdAt ? new Date(proposal.createdAt).toLocaleDateString() : 'N/A',
+        description: proposal.description || 'N/A',
+        businessImpact: 'Funding reference: ' + (proposal.referenceNumber || 'N/A')
+    } : parseProposalPurpose(proposal.purpose);
+
     const ALL_MSPS = ['FinanceMSP', 'TrusteeMSP', 'OperationsMSP', 'AuditMSP'];
     const votedList = proposal.votedOrgs || [];
     const pendingList = ALL_MSPS.filter(msp => !votedList.includes(msp));
+    
+    const displayId = isFunding ? proposal.id : proposal.proposalId;
+    const requestType = isFunding ? 'Funding Request' : 'Funding Request'; // Kept as original style
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 max-w-5xl mx-auto">
@@ -194,19 +215,19 @@ export function VotingDetails() {
             <div>
                 <Button 
                     variant="link" 
-                    onClick={() => navigate('/dashboard/voting')}
+                    onClick={() => navigate(isFunding ? '/dashboard/funding' : '/dashboard/voting')}
                     className="px-0 text-muted-foreground hover:text-white mb-4 -ml-2"
                 >
                     <ArrowLeft className="h-4 w-4 mr-1" />
-                    Back to Pending Proposals
+                    Back to Pending {isFunding ? 'Funding Proposals' : 'Proposals'}
                 </Button>
                 <div className="flex items-center justify-between mb-2">
                     <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                        Review {proposal.proposalId}
+                        Review {displayId}
                     </h1>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                    Review the structured funding request document carefully before casting your organization's immutable vote.
+                    Review the {isFunding ? 'funding' : 'structured funding'} request document carefully before casting your organization's immutable vote.
                 </p>
             </div>
 
@@ -217,12 +238,12 @@ export function VotingDetails() {
                     <GlassCard className="p-8 space-y-8">
                         <div>
                             <h2 className="text-xs font-semibold text-primary uppercase tracking-widest mb-4 border-b border-white/5 pb-2">
-                                Funding Request Metadata
+                                {isFunding ? 'Funding Details Metadata' : 'Funding Request Metadata'}
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                 <div className="space-y-1">
                                     <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest block">Proposal ID</span>
-                                    <span className="text-white font-medium text-sm">{proposal.proposalId}</span>
+                                    <span className="text-white font-medium text-sm">{displayId}</span>
                                 </div>
                                 <div className="space-y-1">
                                     <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest block">Proposal Title</span>
@@ -240,30 +261,34 @@ export function VotingDetails() {
                                     <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest block">Submission Date</span>
                                     <span className="text-white font-medium text-sm">{details.submissionDate}</span>
                                 </div>
+                                {!isFunding && (
+                                    <div className="space-y-1">
+                                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest block">Required By Date</span>
+                                        <span className="text-white font-medium text-sm">{details.requiredByDate}</span>
+                                    </div>
+                                )}
                                 <div className="space-y-1">
-                                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest block">Required By Date</span>
-                                    <span className="text-white font-medium text-sm">{details.requiredByDate}</span>
-                                </div>
-                                <div className="space-y-1">
-                                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest block">Category</span>
+                                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest block">{isFunding ? 'Source' : 'Category'}</span>
                                     <span className="text-white font-medium text-sm">{details.category}</span>
                                 </div>
-                                <div className="space-y-1">
-                                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest block">Priority</span>
-                                    <div>
-                                        <Badge 
-                                            variant={
-                                                details.priority === 'Critical' || details.priority === 'High' 
-                                                    ? 'destructive' 
-                                                    : details.priority === 'Medium' 
-                                                        ? 'warning' 
-                                                        : 'secondary'
-                                            }
-                                        >
-                                            {details.priority}
-                                        </Badge>
+                                {!isFunding && (
+                                    <div className="space-y-1">
+                                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest block">Priority</span>
+                                        <div>
+                                            <Badge 
+                                                variant={
+                                                    details.priority === 'Critical' || details.priority === 'High' 
+                                                        ? 'destructive' 
+                                                        : details.priority === 'Medium' 
+                                                            ? 'warning' 
+                                                            : 'secondary'
+                                                }
+                                            >
+                                                {details.priority}
+                                            </Badge>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     </GlassCard>
@@ -282,7 +307,7 @@ export function VotingDetails() {
                     <GlassCard className="p-8">
                         <div className="space-y-4">
                             <h3 className="text-xs font-semibold text-primary uppercase tracking-widest border-b border-white/5 pb-2">
-                                Purpose & Description
+                                {isFunding ? 'Reason & Description' : 'Purpose & Description'}
                             </h3>
                             <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                                 {details.description}
@@ -294,7 +319,7 @@ export function VotingDetails() {
                     <GlassCard className="p-8">
                         <div className="space-y-4">
                             <h3 className="text-xs font-semibold text-primary uppercase tracking-widest border-b border-white/5 pb-2">
-                                Expected Business Impact
+                                {isFunding ? 'Additional Context' : 'Expected Business Impact'}
                             </h3>
                             <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                                 {details.businessImpact}
@@ -332,7 +357,12 @@ export function VotingDetails() {
                                         </div>
                                     )}
 
-                                    {!isPending ? (
+                                    {proposal.status?.toUpperCase() === 'EXPIRED' ? (
+                                        <div className="p-4 bg-white/5 border border-white/10 rounded-lg text-center">
+                                            <p className="text-white font-medium mb-1">Voting Deadline Passed</p>
+                                            <p className="text-sm text-muted-foreground">This proposal has expired based on its Required By Date and is no longer eligible for voting.</p>
+                                        </div>
+                                    ) : !isPending ? (
                                         <div className="p-4 bg-white/5 border border-white/10 rounded-lg text-center">
                                             <p className="text-white font-medium mb-1">Voting Closed</p>
                                             <p className="text-sm text-muted-foreground">This proposal has already reached a final state ({proposal.status}).</p>
@@ -343,33 +373,43 @@ export function VotingDetails() {
                                             <span className="font-medium">Vote Submitted by {formatOrgName(user.organization)}</span>
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                                            <Button 
-                                                variant="success" 
-                                                className="flex-1 py-6 text-lg gap-3 shadow-[0_0_20px_rgba(16,185,129,0.1)] hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all"
-                                                onClick={() => handleVoteClick('APPROVE')}
-                                                disabled={isSubmitting || isLoading}
-                                            >
-                                                {isSubmitting && selectedVote === 'APPROVE' ? (
-                                                    <Loader2 className="h-6 w-6 animate-spin text-white" />
-                                                ) : (
-                                                    <Check className="h-6 w-6" />
-                                                )}
-                                                Approve
-                                            </Button>
-                                            <Button 
-                                                variant="destructive" 
-                                                className="flex-1 py-6 text-lg gap-3 shadow-[0_0_20px_rgba(239,68,68,0.1)] hover:shadow-[0_0_30px_rgba(239,68,68,0.2)] transition-all"
-                                                onClick={() => handleVoteClick('REJECT')}
-                                                disabled={isSubmitting || isLoading}
-                                            >
-                                                {isSubmitting && selectedVote === 'REJECT' ? (
-                                                    <Loader2 className="h-6 w-6 animate-spin text-white" />
-                                                ) : (
-                                                    <X className="h-6 w-6" />
-                                                )}
-                                                Reject
-                                            </Button>
+                                        <div className="space-y-3 mt-2">
+                                            {user?.role !== 'admin' && (
+                                                <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-lg text-xs flex items-center justify-center gap-2 font-medium">
+                                                    <XCircle className="h-4 w-4 shrink-0 text-amber-400" />
+                                                    <span>Voting is restricted to Admin accounts (Admin Only).</span>
+                                                </div>
+                                            )}
+                                            <div className="flex flex-col sm:flex-row gap-4">
+                                                <Button 
+                                                    variant="success" 
+                                                    className="flex-1 py-6 text-lg gap-3 shadow-[0_0_20px_rgba(16,185,129,0.1)] hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    onClick={() => handleVoteClick('APPROVE')}
+                                                    disabled={isSubmitting || isLoading || user?.role !== 'admin'}
+                                                    title={user?.role !== 'admin' ? "Admin Only: User role cannot vote" : ""}
+                                                >
+                                                    {isSubmitting && selectedVote === 'APPROVE' ? (
+                                                        <Loader2 className="h-6 w-6 animate-spin text-white" />
+                                                    ) : (
+                                                        <Check className="h-6 w-6" />
+                                                    )}
+                                                    Approve {user?.role !== 'admin' && '(Admin Only)'}
+                                                </Button>
+                                                <Button 
+                                                    variant="destructive" 
+                                                    className="flex-1 py-6 text-lg gap-3 shadow-[0_0_20px_rgba(239,68,68,0.1)] hover:shadow-[0_0_30px_rgba(239,68,68,0.2)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    onClick={() => handleVoteClick('REJECT')}
+                                                    disabled={isSubmitting || isLoading || user?.role !== 'admin'}
+                                                    title={user?.role !== 'admin' ? "Admin Only: User role cannot vote" : ""}
+                                                >
+                                                    {isSubmitting && selectedVote === 'REJECT' ? (
+                                                        <Loader2 className="h-6 w-6 animate-spin text-white" />
+                                                    ) : (
+                                                        <X className="h-6 w-6" />
+                                                    )}
+                                                    Reject {user?.role !== 'admin' && '(Admin Only)'}
+                                                </Button>
+                                            </div>
                                         </div>
                                     )}
                                 </>
@@ -386,11 +426,13 @@ export function VotingDetails() {
                             <div className="flex items-center gap-2">
                                 <Badge 
                                     variant={
-                                        proposal.status === 'APPROVED' 
+                                        proposal.status?.toUpperCase() === 'APPROVED' 
                                             ? 'success' 
-                                            : proposal.status === 'REJECTED' 
+                                            : proposal.status?.toUpperCase() === 'REJECTED' 
                                                 ? 'destructive' 
-                                                : 'warning'
+                                                : proposal.status?.toUpperCase() === 'EXPIRED'
+                                                    ? 'secondary'
+                                                    : 'warning'
                                     } 
                                     className="text-xs uppercase tracking-wider px-2 py-0.5"
                                 >

@@ -21,13 +21,16 @@ function authMiddleware(req, res, next) {
         const decodedUser = authService.verifyToken(token);
         req.user = decodedUser;
         
-        // Lookup the fabric config for this organization
-        const orgCreds = authConfig.credentials[decodedUser.organization];
-        if (!orgCreds) {
-            throw new Error('Invalid organization in token.');
+        // Find matching account credentials by organization and username
+        const accountEntry = Object.values(authConfig.credentials).find(
+            acc => acc.organization === decodedUser.organization && acc.username === decodedUser.username
+        );
+
+        if (!accountEntry) {
+            throw new Error('Invalid user identity in token.');
         }
         
-        req.fabricConfig = orgCreds.fabric;
+        req.fabricConfig = accountEntry.fabric;
         
         next();
     } catch (error) {

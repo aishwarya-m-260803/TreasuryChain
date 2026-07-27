@@ -3,7 +3,7 @@ const authConfig = require('../config/authConfig');
 
 /**
  * Validates the given organization, username, and password against the static credential map.
- * Returns the fabric configuration for the organization if valid, or throws an error.
+ * Returns the matching account configuration if valid, or throws an error.
  */
 function validateCredentials(organization, username, password) {
     if (!organization || !username || !password) {
@@ -11,18 +11,23 @@ function validateCredentials(organization, username, password) {
     }
 
     const orgKey = organization.toLowerCase().trim();
-    const creds = authConfig.credentials[orgKey];
+    const userKey = username.trim();
 
-    if (!creds) {
-        throw new Error('Invalid organization.');
+    // Find account by matching organization and username
+    const accountEntry = Object.values(authConfig.credentials).find(
+        acc => acc.organization === orgKey && acc.username === userKey
+    );
+
+    if (!accountEntry) {
+        throw new Error('Invalid username or organization.');
     }
 
     // In a real application, passwords would be hashed. For this demo, we compare plain text.
-    if (creds.username !== username || creds.password !== password) {
+    if (accountEntry.password !== password) {
         throw new Error('Invalid username or password.');
     }
 
-    return creds.fabric;
+    return accountEntry;
 }
 
 /**

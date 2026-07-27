@@ -8,11 +8,13 @@ async function login(req, res) {
     try {
         const { organization, username, password } = req.body;
         
-        const fabricConfig = authService.validateCredentials(organization, username, password);
+        const accountEntry = authService.validateCredentials(organization, username, password);
+        const fabricConfig = accountEntry.fabric;
         
         const userPayload = {
-            organization: organization.toLowerCase(),
-            username,
+            organization: accountEntry.organization,
+            username: accountEntry.username,
+            role: accountEntry.role,
             mspId: fabricConfig.mspId,
             userIdentity: fabricConfig.userIdentity
         };

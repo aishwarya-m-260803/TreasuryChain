@@ -10,7 +10,8 @@ import {
     ShieldCheck, 
     History,
     LogOut,
-    Shield
+    Shield,
+    Banknote
 } from 'lucide-react';
 import { Button } from '../ui/button';
 
@@ -20,6 +21,8 @@ export function Sidebar() {
     const navItems = [
         { path: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true },
         { path: '/dashboard/proposals', label: 'Proposals', icon: FileText },
+        { path: '/dashboard/funding', label: 'Funding', icon: Banknote },
+        { path: '/dashboard/funding-history', label: 'Funding History', icon: History },
         { path: '/dashboard/voting', label: 'Voting', icon: Vote },
         { path: '/dashboard/reserve', label: 'Treasury Reserve', icon: Landmark },
         { path: '/dashboard/expenses', label: 'Expenses', icon: Receipt },

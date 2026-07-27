@@ -5,6 +5,8 @@ import DashboardPage from './pages/DashboardPage';
 import { DashboardOverview } from './pages/dashboard/DashboardOverview';
 import { ProposalsView } from './pages/dashboard/ProposalsView';
 import { ProposalDetails } from './pages/dashboard/ProposalDetails';
+import { FundingView } from './pages/dashboard/FundingView';
+import { FundingHistoryView } from './pages/dashboard/FundingHistoryView';
 import { VotingView } from './pages/dashboard/VotingView';
 import { VotingDetails } from './pages/dashboard/VotingDetails';
 import { ReserveView } from './pages/dashboard/ReserveView';
@@ -47,6 +49,8 @@ function App() {
                     <Route index element={<DashboardOverview />} />
                     <Route path="proposals" element={<ProposalsView />} />
                     <Route path="proposals/:id" element={<ProposalDetails />} />
+                    <Route path="funding" element={<FundingView />} />
+                    <Route path="funding-history" element={<FundingHistoryView />} />
                     <Route path="voting" element={<VotingView />} />
                     <Route path="voting/:id" element={<VotingDetails />} />
                     <Route path="reserve" element={<ReserveView />} />

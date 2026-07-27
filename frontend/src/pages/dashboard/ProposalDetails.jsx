@@ -45,6 +45,7 @@ export function ProposalDetails() {
             case 'PENDING': return { color: 'warning', icon: Clock, text: 'Pending Consensus' };
             case 'APPROVED': return { color: 'success', icon: CheckCircle2, text: 'Approved & Executed' };
             case 'REJECTED': return { color: 'destructive', icon: XCircle, text: 'Rejected' };
+            case 'EXPIRED': return { color: 'secondary', icon: XCircle, text: 'Expired' };
             default: return { color: 'secondary', icon: FileText, text: status };
         }
     };

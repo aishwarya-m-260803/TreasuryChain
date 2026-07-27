@@ -71,6 +71,35 @@ export function useTreasuryApi() {
         return handleRequest(() => api.get('/treasury/network-config'));
     }, []);
 
+    const getFundingProposals = useCallback(() => {
+        return handleRequest(() => api.get('/treasury/funding'));
+    }, []);
+
+    const getFundingProposalById = useCallback((id) => {
+        return handleRequest(() => api.get(`/treasury/funding/${id}`));
+    }, []);
+
+    const createFundingProposal = useCallback((data) => {
+        return handleRequest(
+            () => api.post('/treasury/funding', data),
+            'Funding proposal created successfully'
+        );
+    }, []);
+
+    const voteOnFundingProposal = useCallback((id, vote) => {
+        return handleRequest(
+            () => api.post(`/treasury/funding/${id}/vote`, { vote }),
+            'Vote submitted successfully'
+        );
+    }, []);
+
+    const confirmFundingProposal = useCallback((id) => {
+        return handleRequest(
+            () => api.post(`/treasury/funding/${id}/confirm`),
+            'Funding proposal confirmed successfully'
+        );
+    }, []);
+
     return {
         isLoading,
         error,
@@ -83,6 +112,11 @@ export function useTreasuryApi() {
         getProposalById,
         voteOnProposal,
         getProposalHistory,
-        getNetworkConfig
+        getNetworkConfig,
+        getFundingProposals,
+        getFundingProposalById,
+        createFundingProposal,
+        voteOnFundingProposal,
+        confirmFundingProposal
     };
 }

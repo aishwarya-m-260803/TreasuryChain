@@ -6,13 +6,12 @@ import { GlassCard } from '../../components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
-import { SectionTitle, BodyText } from '../../components/typography/Typography';
-import { FileText, Search, Plus, Filter, Loader2, ArrowRight } from 'lucide-react';
-import { CreateProposalModal } from './components/CreateProposalModal';
+import { FileText, Search, Plus, Filter, Loader2, Check, X } from 'lucide-react';
+import { CreateFundingModal } from './components/CreateFundingModal';
 
-export function ProposalsView() {
+export function FundingView() {
     const { user } = useAuth();
-    const { getProposals, isLoading } = useTreasuryApi();
+    const { getFundingProposals, voteOnFundingProposal, confirmFundingProposal, isLoading } = useTreasuryApi();
     const navigate = useNavigate();
     
     const [proposals, setProposals] = useState([]);
@@ -23,7 +22,7 @@ export function ProposalsView() {
     const [statusFilter, setStatusFilter] = useState('ALL');
 
     const fetchProposals = async () => {
-        const data = await getProposals();
+        const data = await getFundingProposals();
         if (data) {
             setProposals(data);
         }
@@ -39,11 +38,11 @@ export function ProposalsView() {
     };
 
     const getStatusColor = (status) => {
-        switch (status) {
+        switch (status?.toUpperCase()) {
             case 'PENDING': return 'warning';
             case 'APPROVED': return 'success';
             case 'REJECTED': return 'destructive';
-            case 'EXPIRED': return 'secondary';
+            case 'CONFIRMED': return 'primary';
             default: return 'secondary';
         }
     };
@@ -53,21 +52,38 @@ export function ProposalsView() {
         return proposals.filter(prop => {
             const matchesSearch = 
                 prop.Key.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                prop.Record.purpose.toLowerCase().includes(searchQuery.toLowerCase());
+                prop.Record.organization.toLowerCase().includes(searchQuery.toLowerCase());
             
-            const matchesStatus = statusFilter === 'ALL' || prop.Record.status === statusFilter;
+            const matchesStatus = statusFilter === 'ALL' || prop.Record.status.toUpperCase() === statusFilter;
             
             return matchesSearch && matchesStatus;
         });
     }, [proposals, searchQuery, statusFilter]);
+
+    const handleVote = async (id, vote) => {
+        if (!window.confirm(`Are you sure you want to ${vote} this funding proposal?`)) return;
+        const success = await voteOnFundingProposal(id, vote);
+        if (success) fetchProposals();
+    };
+
+    const handleConfirm = async (id) => {
+        if (!window.confirm('Are you sure you want to confirm this funding proposal and add to reserve?')) return;
+        const success = await confirmFundingProposal(id);
+        if (success) fetchProposals();
+    };
+
+    // Finance Admin check (user.organization 'finance' or role 'admin' representing Finance Admin depending on your structure)
+    // The requirement says "Only Finance Admin can confirm". Let's assume user.organization === 'finance' && user.role === 'admin'
+    // Let's use simple logic: user.organization?.toLowerCase() === 'finance' && user.role === 'admin'
+    const isFinanceAdmin = user?.organization?.toLowerCase() === 'finance' && user?.role === 'admin';
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white mb-1">Proposals</h1>
-                    <p className="text-muted-foreground">Manage and track treasury funding requests.</p>
+                    <h1 className="text-3xl font-bold text-white mb-1">Funding</h1>
+                    <p className="text-muted-foreground">Manage and track treasury funding proposals.</p>
                 </div>
                 <Button 
                     variant="primary" 
@@ -77,7 +93,7 @@ export function ProposalsView() {
                     title={user?.role !== 'admin' ? 'Admin Only' : ''}
                 >
                     <Plus className="h-4 w-4" />
-                    Create Proposal {user?.role !== 'admin' && '(Admin Only)'}
+                    Create Funding {user?.role !== 'admin' && '(Admin Only)'}
                 </Button>
             </div>
 
@@ -90,7 +106,7 @@ export function ProposalsView() {
                         </div>
                         <input
                             type="text"
-                            placeholder="Search by ID or Purpose..."
+                            placeholder="Search by ID or Organization..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="block w-full pl-10 pr-3 py-2 bg-black/40 border border-white/10 rounded-md text-sm text-white placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
@@ -107,6 +123,7 @@ export function ProposalsView() {
                             <option value="PENDING">Pending</option>
                             <option value="APPROVED">Approved</option>
                             <option value="REJECTED">Rejected</option>
+                            <option value="CONFIRMED">Confirmed</option>
                         </select>
                     </div>
                 </div>
@@ -117,17 +134,18 @@ export function ProposalsView() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>ID</TableHead>
-                                <TableHead>Purpose</TableHead>
                                 <TableHead>Amount</TableHead>
+                                <TableHead>Organization</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Votes</TableHead>
+                                <TableHead>Created At</TableHead>
                                 <TableHead className="text-right">Action</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading && proposals.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-32 text-center">
+                                    <TableCell colSpan={7} className="h-32 text-center">
                                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                                             <Loader2 className="h-6 w-6 animate-spin mb-2 text-primary" />
                                             <span>Loading proposals...</span>
@@ -138,34 +156,43 @@ export function ProposalsView() {
                                 filteredProposals.map((prop) => (
                                     <TableRow key={prop.Key} className="group">
                                         <TableCell className="font-medium text-white">{prop.Key}</TableCell>
-                                        <TableCell className="text-muted-foreground max-w-xs truncate" title={prop.Record.purpose}>
-                                            {prop.Record.purpose}
-                                        </TableCell>
                                         <TableCell className="text-white">{formatCurrency(prop.Record.amount)}</TableCell>
+                                        <TableCell className="text-muted-foreground">{prop.Record.organization}</TableCell>
                                         <TableCell>
                                             <Badge variant={getStatusColor(prop.Record.status)}>
                                                 {prop.Record.status}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">{prop.Record.votes}</TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {new Date(prop.Record.createdAt).toLocaleDateString()}
+                                        </TableCell>
                                         <TableCell className="text-right">
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm" 
-                                                onClick={() => navigate(`/dashboard/proposals/${prop.Key}`)}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity gap-1"
-                                            >
-                                                Details <ArrowRight className="h-3 w-3" />
-                                            </Button>
+                                            <div className="flex justify-end gap-2">
+                                                {prop.Record.status.toUpperCase() === 'PENDING' && (
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="primary" 
+                                                        onClick={() => navigate(`/dashboard/voting/${prop.Key}?type=funding`)}
+                                                    >
+                                                        Review & Vote
+                                                    </Button>
+                                                )}
+                                                {prop.Record.status.toUpperCase() === 'APPROVED' && isFinanceAdmin && (
+                                                    <Button size="sm" variant="primary" onClick={() => handleConfirm(prop.Key)} title="Confirm Funding">
+                                                        Confirm
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-32 text-center">
+                                    <TableCell colSpan={7} className="h-32 text-center">
                                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                                             <FileText className="h-8 w-8 mb-2 opacity-20" />
-                                            <p>No proposals found.</p>
+                                            <p>No funding proposals found.</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -175,7 +202,7 @@ export function ProposalsView() {
                 </div>
             </GlassCard>
 
-            <CreateProposalModal 
+            <CreateFundingModal 
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
                 onSuccess={() => {

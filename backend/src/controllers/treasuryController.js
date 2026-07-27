@@ -271,6 +271,83 @@ async function getNetworkConfig(req, res) {
     }
 }
 
+async function createFundingProposal(req, res) {
+    try {
+        const { amount, organization, source, referenceNumber, reason, description } = req.body;
+
+        if (amount === undefined || amount === null) {
+            return res.status(400).json({ success: false, message: 'Amount is required.' });
+        }
+        const parsedAmount = parseInt(amount, 10);
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
+            return res.status(400).json({ success: false, message: 'Amount must be a positive integer.' });
+        }
+        const proposal = await treasuryService.createFundingProposal(
+            req.fabricConfig, parsedAmount.toString(), organization || '', source || '', referenceNumber || '', reason || '', description || ''
+        );
+        res.status(201).json({ success: true, data: proposal });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'An error occurred while creating the funding proposal.', error: error.message });
+    }
+}
+
+async function voteFundingProposal(req, res) {
+    try {
+        const { id } = req.params;
+        const { vote } = req.body;
+        if (!id || id.trim() === '') return res.status(400).json({ success: false, message: 'Proposal ID is required.' });
+        if (!vote || (vote !== 'APPROVE' && vote !== 'REJECT')) return res.status(400).json({ success: false, message: 'Vote must be either "APPROVE" or "REJECT".' });
+        const updatedProposal = await treasuryService.voteOnFundingProposal(req.fabricConfig, id.trim(), vote);
+        res.status(200).json({ success: true, data: updatedProposal });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'An error occurred while casting the vote.', error: error.message });
+    }
+}
+
+async function confirmFundingProposal(req, res) {
+    try {
+        const { id } = req.params;
+        if (!id || id.trim() === '') return res.status(400).json({ success: false, message: 'Proposal ID is required.' });
+        
+        const confirmedBy = req.user ? req.user.username : 'Unknown';
+        
+        const updatedProposal = await treasuryService.confirmFundingProposal(req.fabricConfig, id.trim(), confirmedBy);
+        res.status(200).json({ success: true, data: updatedProposal });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'An error occurred while confirming the funding proposal.', error: error.message });
+    }
+}
+
+async function getFundingProposal(req, res) {
+    try {
+        const { id } = req.params;
+        if (!id || id.trim() === '') return res.status(400).json({ success: false, message: 'Proposal ID is required.' });
+        const proposal = await treasuryService.getFundingProposalById(req.fabricConfig, id.trim());
+        res.status(200).json({ success: true, data: proposal });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'An error occurred while fetching the funding proposal.', error: error.message });
+    }
+}
+
+async function listFundingProposals(req, res) {
+    try {
+        let status;
+        if (req.path.endsWith('/pending')) status = 'PENDING';
+        else if (req.path.endsWith('/approved')) status = 'APPROVED';
+        else if (req.path.endsWith('/rejected')) status = 'REJECTED';
+        
+        let proposals;
+        if (status) {
+            proposals = await treasuryService.listFundingProposalsByStatus(req.fabricConfig, status);
+        } else {
+            proposals = await treasuryService.listAllFundingProposals(req.fabricConfig);
+        }
+        res.status(200).json({ success: true, data: proposals });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'An error occurred while fetching the funding proposals list.', error: error.message });
+    }
+}
+
 module.exports = {
     getSummary,
     createProposal,
@@ -281,5 +358,10 @@ module.exports = {
     getExpenses,
     getAuditLogs,
     getProposalHistory,
-    getNetworkConfig
+    getNetworkConfig,
+    createFundingProposal,
+    voteFundingProposal,
+    confirmFundingProposal,
+    getFundingProposal,
+    listFundingProposals
 };

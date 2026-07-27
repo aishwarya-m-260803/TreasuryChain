@@ -1,72 +1,64 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTreasuryApi } from '../../hooks/useTreasuryApi';
 import { GlassCard } from '../../components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
 import { Badge } from '../../components/ui/badge';
-import { Button } from '../../components/ui/button';
-import { Search, Filter, Loader2, ArrowRight, History } from 'lucide-react';
+import { Search, Filter, Loader2, FileText } from 'lucide-react';
 
-export function HistoryView() {
-    const { getProposals, isLoading } = useTreasuryApi();
-    const navigate = useNavigate();
-    
+export function FundingHistoryView() {
+    const { getFundingProposals, isLoading } = useTreasuryApi();
     const [proposals, setProposals] = useState([]);
-    
-    // Filters
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
 
     useEffect(() => {
         let isMounted = true;
-        
-        async function fetchProposals() {
-            const data = await getProposals();
-            if (isMounted && data) {
-                setProposals(data);
+        const fetchHistory = async () => {
+            const data = await getFundingProposals();
+            if (data && isMounted) {
+                // Filter only finalized proposals (Confirmed or Rejected) for history view
+                const historyData = data.filter(p => 
+                    p.Record.status === 'Confirmed' || p.Record.status === 'Rejected'
+                );
+                setProposals(historyData);
             }
-        }
-        
-        fetchProposals();
-        
+        };
+        fetchHistory();
         return () => { isMounted = false; };
-    }, [getProposals]);
+    }, [getFundingProposals]);
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
     };
 
     const getStatusColor = (status) => {
-        switch (status) {
-            case 'PENDING': return 'warning';
-            case 'APPROVED': return 'success';
+        switch (status?.toUpperCase()) {
             case 'REJECTED': return 'destructive';
-            case 'EXPIRED': return 'secondary';
+            case 'CONFIRMED': return 'primary';
             default: return 'secondary';
         }
     };
 
-    // Filter logic
     const filteredProposals = useMemo(() => {
         return proposals.filter(prop => {
             const matchesSearch = 
                 prop.Key.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                prop.Record.purpose.toLowerCase().includes(searchQuery.toLowerCase());
+                prop.Record.organization.toLowerCase().includes(searchQuery.toLowerCase());
             
-            const matchesStatus = statusFilter === 'ALL' || prop.Record.status === statusFilter;
+            const matchesStatus = statusFilter === 'ALL' || prop.Record.status.toUpperCase() === statusFilter;
             
             return matchesSearch && matchesStatus;
         });
     }, [proposals, searchQuery, statusFilter]);
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500 max-w-7xl mx-auto">
+        <div className="space-y-6 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex flex-col gap-2 mb-6">
-                <h1 className="text-3xl font-bold text-white">Proposal History</h1>
-                <p className="text-muted-foreground">
-                    Track the complete lifecycle and chronological state transitions of all treasury proposals.
-                </p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-white mb-1">Funding History</h1>
+                    <p className="text-muted-foreground">Immutable record of finalized treasury funding proposals.</p>
+                </div>
             </div>
 
             <GlassCard className="p-6">
@@ -78,7 +70,7 @@ export function HistoryView() {
                         </div>
                         <input
                             type="text"
-                            placeholder="Search by ID or Title..."
+                            placeholder="Search by ID or Organization..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="block w-full pl-10 pr-3 py-2 bg-black/40 border border-white/10 rounded-md text-sm text-white placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
@@ -91,9 +83,8 @@ export function HistoryView() {
                             onChange={(e) => setStatusFilter(e.target.value)}
                             className="bg-black/40 border border-white/10 rounded-md text-sm text-white py-2 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
                         >
-                            <option value="ALL">All Statuses</option>
-                            <option value="PENDING">Pending</option>
-                            <option value="APPROVED">Approved</option>
+                            <option value="ALL">All Finalized</option>
+                            <option value="CONFIRMED">Confirmed</option>
                             <option value="REJECTED">Rejected</option>
                         </select>
                     </div>
@@ -105,19 +96,21 @@ export function HistoryView() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>ID</TableHead>
-                                <TableHead>Title</TableHead>
-                                <TableHead>Requested Amount</TableHead>
-                                <TableHead>Final Status</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
+                                <TableHead>Amount</TableHead>
+                                <TableHead>Organization</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Confirmed By</TableHead>
+                                <TableHead>Created At</TableHead>
+                                <TableHead>Confirmed At</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading && proposals.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-32 text-center">
+                                    <TableCell colSpan={7} className="h-32 text-center">
                                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                                             <Loader2 className="h-6 w-6 animate-spin mb-2 text-primary" />
-                                            <span>Loading history ledger...</span>
+                                            <span>Loading history...</span>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -125,34 +118,28 @@ export function HistoryView() {
                                 filteredProposals.map((prop) => (
                                     <TableRow key={prop.Key} className="group">
                                         <TableCell className="font-medium text-white">{prop.Key}</TableCell>
-                                        <TableCell className="text-muted-foreground max-w-sm truncate" title={prop.Record.purpose}>
-                                            {prop.Record.purpose}
-                                        </TableCell>
                                         <TableCell className="text-white font-medium">{formatCurrency(prop.Record.amount)}</TableCell>
+                                        <TableCell className="text-muted-foreground">{prop.Record.organization}</TableCell>
                                         <TableCell>
                                             <Badge variant={getStatusColor(prop.Record.status)}>
                                                 {prop.Record.status}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm" 
-                                                onClick={() => navigate(`/dashboard/history/${prop.Key}`)}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity gap-2"
-                                            >
-                                                Timeline <ArrowRight className="h-3 w-3" />
-                                            </Button>
+                                        <TableCell className="text-muted-foreground">{prop.Record.confirmedBy || '—'}</TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {new Date(prop.Record.createdAt).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {prop.Record.confirmedAt ? new Date(prop.Record.confirmedAt).toLocaleDateString() : '—'}
                                         </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-40 text-center">
+                                    <TableCell colSpan={7} className="h-32 text-center">
                                         <div className="flex flex-col items-center justify-center text-muted-foreground">
-                                            <History className="h-8 w-8 mb-3 opacity-20" />
-                                            <p className="text-white font-medium mb-1">No Records Found</p>
-                                            <p className="text-sm">No proposals match your search or filter criteria.</p>
+                                            <FileText className="h-8 w-8 mb-2 opacity-20" />
+                                            <p>No funding history found.</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
