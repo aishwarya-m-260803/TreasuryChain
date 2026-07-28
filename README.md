@@ -134,12 +134,6 @@ TreasuryChain/
 
 **Aishwarya M**
 
-Blockchain Developer • Full Stack Developer
-
-- 🔗 **GitHub:** https://github.com/your-username
-- 💼 **LinkedIn:** https://linkedin.com/in/your-linkedin
-- 📧 **Email:** your.email@example.com
-
 Passionate about building secure, scalable, and enterprise-grade applications using blockchain technologies, distributed systems, and modern full-stack development.
 
 ---
