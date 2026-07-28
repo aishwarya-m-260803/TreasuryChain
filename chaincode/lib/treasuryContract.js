@@ -22,7 +22,7 @@ class TreasuryContract extends Contract {
         console.log('Treasury Reserve initialized with 1,000,000 and Proposal Counter initialized to 0.');
     }
 
-    async CreateProposal(ctx, amountStr, purpose) {
+    async CreateProposal(ctx, amountStr, purpose, documentHash = '') {
         this._authorize(ctx);
 
         const amount = parseInt(amountStr);
@@ -66,6 +66,7 @@ class TreasuryContract extends Contract {
             proposalId: proposalId,
             amount: amount,
             purpose: purpose,
+            documentHash: documentHash || '',
             status: 'PENDING',
             votes: 0,
             votedOrgs: [],
@@ -487,7 +488,7 @@ class TreasuryContract extends Contract {
         }
     }
 
-    async CreateFundingProposal(ctx, amountStr, organization, source, referenceNumber, reason, description) {
+    async CreateFundingProposal(ctx, amountStr, organization, source, referenceNumber, reason, description, documentHash = '') {
         this._authorize(ctx, ['FinanceMSP']);
 
         const amount = parseInt(amountStr);
@@ -542,6 +543,7 @@ class TreasuryContract extends Contract {
             referenceNumber: referenceNumber,
             reason: reason,
             description: description,
+            documentHash: documentHash || '',
             status: 'Pending',
             votes: 0,
             approved: false,
@@ -747,6 +749,53 @@ class TreasuryContract extends Contract {
             }
         }
         return JSON.stringify(allResults);
+    }
+
+    async VerifyDocumentHash(ctx, proposalId, documentHash) {
+        if (!proposalId || proposalId.trim() === '') {
+            throw new Error('Proposal ID is required.');
+        }
+        if (!documentHash || documentHash.trim() === '') {
+            throw new Error('Document hash is required.');
+        }
+
+        const cleanProposalId = proposalId.trim();
+        const cleanDocHash = documentHash.trim().toLowerCase();
+
+        const assetBytes = await ctx.stub.getState(cleanProposalId);
+        if (!assetBytes || assetBytes.length === 0) {
+            return JSON.stringify({
+                verified: false,
+                message: `Proposal with ID ${cleanProposalId} not found on ledger.`,
+                proposalId: cleanProposalId,
+                storedHash: '',
+                providedHash: cleanDocHash
+            });
+        }
+
+        const asset = JSON.parse(assetBytes.toString('utf8'));
+        const storedHash = (asset.documentHash || '').trim().toLowerCase();
+
+        if (!storedHash) {
+            return JSON.stringify({
+                verified: false,
+                message: `Proposal ${cleanProposalId} does not have a document hash stored on the ledger.`,
+                proposalId: cleanProposalId,
+                storedHash: '',
+                providedHash: cleanDocHash
+            });
+        }
+
+        const isMatch = storedHash === cleanDocHash;
+        return JSON.stringify({
+            verified: isMatch,
+            message: isMatch
+                ? 'Document verification successful: SHA-256 hash matches the ledger record.'
+                : 'Document verification failed: Provided SHA-256 hash does not match the ledger record.',
+            proposalId: cleanProposalId,
+            storedHash: asset.documentHash,
+            providedHash: documentHash
+        });
     }
 }
 

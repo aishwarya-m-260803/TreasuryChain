@@ -45,9 +45,9 @@ export function useTreasuryApi() {
         return handleRequest(() => api.get('/treasury/audit-logs'));
     }, []);
 
-    const createProposal = useCallback((amount, purpose) => {
+    const createProposal = useCallback((amount, purpose, documentHash = '') => {
         return handleRequest(
-            () => api.post('/treasury/proposals', { amount, purpose }),
+            () => api.post('/treasury/proposals', { amount, purpose, documentHash }),
             'Proposal created successfully'
         );
     }, []);
@@ -100,6 +100,12 @@ export function useTreasuryApi() {
         );
     }, []);
 
+    const verifyDocumentHash = useCallback((proposalId, documentHash) => {
+        return handleRequest(
+            () => api.post('/treasury/verify-document', { proposalId, documentHash })
+        );
+    }, []);
+
     return {
         isLoading,
         error,
@@ -117,6 +123,7 @@ export function useTreasuryApi() {
         getFundingProposalById,
         createFundingProposal,
         voteOnFundingProposal,
-        confirmFundingProposal
+        confirmFundingProposal,
+        verifyDocumentHash
     };
 }

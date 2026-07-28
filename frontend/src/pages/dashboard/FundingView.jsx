@@ -6,8 +6,9 @@ import { GlassCard } from '../../components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
-import { FileText, Search, Plus, Filter, Loader2, Check, X } from 'lucide-react';
+import { FileText, Search, Plus, Filter, Loader2, Check, X, ShieldCheck } from 'lucide-react';
 import { CreateFundingModal } from './components/CreateFundingModal';
+import { VerifyDocumentModal } from './components/VerifyDocumentModal';
 
 export function FundingView() {
     const { user } = useAuth();
@@ -16,6 +17,8 @@ export function FundingView() {
     
     const [proposals, setProposals] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+    const [verifyProposalId, setVerifyProposalId] = useState('');
     
     // Filters
     const [searchQuery, setSearchQuery] = useState('');
@@ -47,6 +50,11 @@ export function FundingView() {
         }
     };
 
+    const handleOpenVerify = (proposalId = '') => {
+        setVerifyProposalId(proposalId);
+        setIsVerifyModalOpen(true);
+    };
+
     // Filter logic
     const filteredProposals = useMemo(() => {
         return proposals.filter(prop => {
@@ -72,9 +80,6 @@ export function FundingView() {
         if (success) fetchProposals();
     };
 
-    // Finance Admin check (user.organization 'finance' or role 'admin' representing Finance Admin depending on your structure)
-    // The requirement says "Only Finance Admin can confirm". Let's assume user.organization === 'finance' && user.role === 'admin'
-    // Let's use simple logic: user.organization?.toLowerCase() === 'finance' && user.role === 'admin'
     const isFinanceAdmin = user?.organization?.toLowerCase() === 'finance' && user?.role === 'admin';
 
     return (
@@ -85,16 +90,26 @@ export function FundingView() {
                     <h1 className="text-3xl font-bold text-white mb-1">Funding</h1>
                     <p className="text-muted-foreground">Manage and track treasury funding proposals.</p>
                 </div>
-                <Button 
-                    variant="primary" 
-                    onClick={() => setIsModalOpen(true)} 
-                    disabled={user?.role !== 'admin'} 
-                    className="gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={user?.role !== 'admin' ? 'Admin Only' : ''}
-                >
-                    <Plus className="h-4 w-4" />
-                    Create Funding {user?.role !== 'admin' && '(Admin Only)'}
-                </Button>
+                <div className="flex items-center gap-3 shrink-0">
+                    <Button 
+                        variant="outline" 
+                        onClick={() => handleOpenVerify('')}
+                        className="gap-2 shrink-0 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10"
+                    >
+                        <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                        Verify Document
+                    </Button>
+                    <Button 
+                        variant="primary" 
+                        onClick={() => setIsModalOpen(true)} 
+                        disabled={user?.role !== 'admin'} 
+                        className="gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={user?.role !== 'admin' ? 'Admin Only' : ''}
+                    >
+                        <Plus className="h-4 w-4" />
+                        Create Funding {user?.role !== 'admin' && '(Admin Only)'}
+                    </Button>
+                </div>
             </div>
 
             <GlassCard className="p-6">
@@ -137,6 +152,7 @@ export function FundingView() {
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Organization</TableHead>
                                 <TableHead>Status</TableHead>
+                                <TableHead>Doc Hash</TableHead>
                                 <TableHead>Votes</TableHead>
                                 <TableHead>Created At</TableHead>
                                 <TableHead className="text-right">Action</TableHead>
@@ -145,7 +161,7 @@ export function FundingView() {
                         <TableBody>
                             {isLoading && proposals.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="h-32 text-center">
+                                    <TableCell colSpan={8} className="h-32 text-center">
                                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                                             <Loader2 className="h-6 w-6 animate-spin mb-2 text-primary" />
                                             <span>Loading proposals...</span>
@@ -163,12 +179,34 @@ export function FundingView() {
                                                 {prop.Record.status}
                                             </Badge>
                                         </TableCell>
+                                        <TableCell>
+                                            {prop.Record.documentHash ? (
+                                                <button
+                                                    onClick={() => handleOpenVerify(prop.Key)}
+                                                    className="inline-flex items-center gap-1 text-[11px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded hover:bg-emerald-500/20 transition-colors"
+                                                    title={`Hash: ${prop.Record.documentHash} - Click to verify`}
+                                                >
+                                                    <ShieldCheck className="h-3 w-3" />
+                                                    {prop.Record.documentHash.substring(0, 8)}…
+                                                </button>
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground/40 italic">None</span>
+                                            )}
+                                        </TableCell>
                                         <TableCell className="text-muted-foreground">{prop.Record.votes}</TableCell>
                                         <TableCell className="text-muted-foreground">
                                             {new Date(prop.Record.createdAt).toLocaleDateString()}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    onClick={() => handleOpenVerify(prop.Key)}
+                                                    className="opacity-0 group-hover:opacity-100 transition-opacity gap-1 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                                                >
+                                                    <ShieldCheck className="h-3 w-3" /> Verify
+                                                </Button>
                                                 {prop.Record.status.toUpperCase() === 'PENDING' && (
                                                     <Button 
                                                         size="sm" 
@@ -189,7 +227,7 @@ export function FundingView() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="h-32 text-center">
+                                    <TableCell colSpan={8} className="h-32 text-center">
                                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                                             <FileText className="h-8 w-8 mb-2 opacity-20" />
                                             <p>No funding proposals found.</p>
@@ -210,6 +248,13 @@ export function FundingView() {
                     fetchProposals();
                 }} 
             />
+
+            <VerifyDocumentModal 
+                isOpen={isVerifyModalOpen}
+                onClose={() => setIsVerifyModalOpen(false)}
+                defaultProposalId={verifyProposalId}
+            />
         </div>
     );
 }
+

@@ -25,7 +25,7 @@ async function getSummary(req, res) {
  */
 async function createProposal(req, res) {
     try {
-        const { amount, purpose } = req.body;
+        const { amount, purpose, documentHash } = req.body;
 
         if (amount === undefined || amount === null) {
             return res.status(400).json({
@@ -49,7 +49,12 @@ async function createProposal(req, res) {
             });
         }
 
-        const proposal = await treasuryService.createProposal(req.fabricConfig, parsedAmount.toString(), purpose.trim());
+        const proposal = await treasuryService.createProposal(
+            req.fabricConfig, 
+            parsedAmount.toString(), 
+            purpose.trim(),
+            documentHash || ''
+        );
 
         res.status(201).json({
             success: true,
@@ -273,7 +278,7 @@ async function getNetworkConfig(req, res) {
 
 async function createFundingProposal(req, res) {
     try {
-        const { amount, organization, source, referenceNumber, reason, description } = req.body;
+        const { amount, organization, source, referenceNumber, reason, description, documentHash } = req.body;
 
         if (amount === undefined || amount === null) {
             return res.status(400).json({ success: false, message: 'Amount is required.' });
@@ -283,7 +288,7 @@ async function createFundingProposal(req, res) {
             return res.status(400).json({ success: false, message: 'Amount must be a positive integer.' });
         }
         const proposal = await treasuryService.createFundingProposal(
-            req.fabricConfig, parsedAmount.toString(), organization || '', source || '', referenceNumber || '', reason || '', description || ''
+            req.fabricConfig, parsedAmount.toString(), organization || '', source || '', referenceNumber || '', reason || '', description || '', documentHash || ''
         );
         res.status(201).json({ success: true, data: proposal });
     } catch (error) {
@@ -348,6 +353,36 @@ async function listFundingProposals(req, res) {
     }
 }
 
+async function verifyDocumentHash(req, res) {
+    try {
+        const { proposalId, documentHash } = req.body;
+        if (!proposalId || typeof proposalId !== 'string' || proposalId.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Proposal ID is required.'
+            });
+        }
+        if (!documentHash || typeof documentHash !== 'string' || documentHash.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Document hash is required.'
+            });
+        }
+
+        const result = await treasuryService.verifyDocumentHash(req.fabricConfig, proposalId.trim(), documentHash.trim());
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'An error occurred while verifying document hash.',
+            error: error.message
+        });
+    }
+}
+
 module.exports = {
     getSummary,
     createProposal,
@@ -363,5 +398,6 @@ module.exports = {
     voteFundingProposal,
     confirmFundingProposal,
     getFundingProposal,
-    listFundingProposals
+    listFundingProposals,
+    verifyDocumentHash
 };

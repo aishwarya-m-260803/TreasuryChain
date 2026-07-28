@@ -7,7 +7,8 @@ import { Button } from '../../components/ui/button';
 import { SectionTitle, BodyText } from '../../components/typography/Typography';
 import { Grid } from '../../components/layout/Grid';
 import { Stack } from '../../components/layout/Stack';
-import { ArrowLeft, Loader2, FileText, CheckCircle2, Clock, XCircle, Hammer } from 'lucide-react';
+import { ArrowLeft, Loader2, FileText, CheckCircle2, Clock, XCircle, Hammer, ShieldCheck } from 'lucide-react';
+import { VerifyDocumentModal } from './components/VerifyDocumentModal';
 
 export function ProposalDetails() {
     const { id } = useParams();
@@ -16,6 +17,7 @@ export function ProposalDetails() {
     
     const [proposal, setProposal] = useState(null);
     const [error, setError] = useState(false);
+    const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -84,7 +86,7 @@ export function ProposalDetails() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500 max-w-5xl mx-auto">
             {/* Header */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <Button 
                         variant="link" 
@@ -101,6 +103,14 @@ export function ProposalDetails() {
                         </Badge>
                     </div>
                 </div>
+                <Button 
+                    variant="outline" 
+                    onClick={() => setIsVerifyModalOpen(true)}
+                    className="gap-2 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10 self-start sm:self-auto"
+                >
+                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                    Verify Document
+                </Button>
             </div>
 
             <Grid columns={3} gap="lg">
@@ -110,7 +120,7 @@ export function ProposalDetails() {
                         <div className="space-y-8">
                             <div>
                                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Purpose</h3>
-                                <p className="text-lg text-white font-medium leading-relaxed">
+                                <p className="text-lg text-white font-medium leading-relaxed whitespace-pre-line">
                                     {proposal.purpose}
                                 </p>
                             </div>
@@ -129,6 +139,40 @@ export function ProposalDetails() {
                                         <span className="font-medium">{statusInfo.text}</span>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Document Hash Ledger Card */}
+                            <div className="pt-6 border-t border-white/5">
+                                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center justify-between">
+                                    <span>Immutable Document Hash (Ledger)</span>
+                                    <Badge variant={proposal.documentHash ? "success" : "secondary"} className="text-[10px]">
+                                        {proposal.documentHash ? "Recorded on Ledger" : "No Document Hash"}
+                                    </Badge>
+                                </h3>
+                                {proposal.documentHash ? (
+                                    <div className="p-4 bg-emerald-950/20 border border-emerald-500/20 rounded-lg space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                                                <ShieldCheck className="h-4 w-4" /> SHA-256 Checksum
+                                            </span>
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm" 
+                                                onClick={() => setIsVerifyModalOpen(true)}
+                                                className="h-7 text-xs border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 gap-1"
+                                            >
+                                                <ShieldCheck className="h-3 w-3" /> Verify File
+                                            </Button>
+                                        </div>
+                                        <p className="text-xs font-mono text-white break-all bg-black/40 p-2.5 rounded border border-white/5">
+                                            {proposal.documentHash}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground italic">
+                                        No document hash was uploaded during proposal creation.
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </GlassCard>
@@ -231,6 +275,13 @@ export function ProposalDetails() {
                     )}
                 </div>
             </Grid>
+
+            <VerifyDocumentModal 
+                isOpen={isVerifyModalOpen}
+                onClose={() => setIsVerifyModalOpen(false)}
+                defaultProposalId={proposal.proposalId}
+            />
         </div>
     );
 }
+

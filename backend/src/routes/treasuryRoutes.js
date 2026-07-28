@@ -61,4 +61,7 @@ router.post('/funding/:id/vote', requireRole('admin'), treasuryController.voteFu
 // POST /api/treasury/funding/:id/confirm - Submits a transaction to confirm a funding proposal (Admin only)
 router.post('/funding/:id/confirm', requireRole('admin'), treasuryController.confirmFundingProposal);
 
+// POST /api/treasury/verify-document - Verifies a document's SHA-256 hash against the ledger
+router.post('/verify-document', treasuryController.verifyDocumentHash);
+
 module.exports = router;

@@ -18,10 +18,10 @@ async function getDashboardSummary(orgFabricConfig) {
 /**
  * Submits a transaction to create a new proposal on the ledger.
  */
-async function createProposal(orgFabricConfig, amountStr, purpose) {
+async function createProposal(orgFabricConfig, amountStr, purpose, documentHash = '') {
     try {
         const { contract } = await getContractForOrg(orgFabricConfig);
-        const resultBytes = await contract.submitTransaction('CreateProposal', amountStr, purpose);
+        const resultBytes = await contract.submitTransaction('CreateProposal', amountStr, purpose, documentHash || '');
         const resultJson = Buffer.from(resultBytes).toString('utf8');
         return JSON.parse(resultJson);
     } catch (error) {
@@ -174,10 +174,10 @@ async function getProposalHistory(orgFabricConfig, proposalId) {
     }
 }
 
-async function createFundingProposal(orgFabricConfig, amountStr, organization, source, referenceNumber, reason, description) {
+async function createFundingProposal(orgFabricConfig, amountStr, organization, source, referenceNumber, reason, description, documentHash = '') {
     try {
         const { contract } = await getContractForOrg(orgFabricConfig);
-        const resultBytes = await contract.submitTransaction('CreateFundingProposal', amountStr, organization, source, referenceNumber, reason, description);
+        const resultBytes = await contract.submitTransaction('CreateFundingProposal', amountStr, organization, source, referenceNumber, reason, description, documentHash || '');
         const resultJson = Buffer.from(resultBytes).toString('utf8');
         return JSON.parse(resultJson);
     } catch (error) {
@@ -279,6 +279,18 @@ async function listFundingProposalsByStatus(orgFabricConfig, status) {
     }
 }
 
+async function verifyDocumentHash(orgFabricConfig, proposalId, documentHash) {
+    try {
+        const { contract } = await getContractForOrg(orgFabricConfig);
+        const resultBytes = await contract.evaluateTransaction('VerifyDocumentHash', proposalId, documentHash);
+        const resultJson = Buffer.from(resultBytes).toString('utf8');
+        return JSON.parse(resultJson);
+    } catch (error) {
+        console.error(`Error in verifyDocumentHash for ID ${proposalId}:`, error);
+        throw new Error(`Failed to verify document hash: ${error.message}`);
+    }
+}
+
 module.exports = {
     getDashboardSummary,
     createProposal,
@@ -295,5 +307,6 @@ module.exports = {
     confirmFundingProposal,
     getFundingProposalById,
     listAllFundingProposals,
-    listFundingProposalsByStatus
+    listFundingProposalsByStatus,
+    verifyDocumentHash
 };
