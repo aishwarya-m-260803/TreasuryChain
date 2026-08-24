@@ -5,7 +5,7 @@ import { colors } from '../../theme/constants';
 
 export const AnimatedGradientBlob = React.memo(function AnimatedGradientBlob({
   className,
-  color = 'rgba(99, 102, 241, 0.12)',
+  color = 'rgba(193, 18, 31, 0.1)',
   size = '350px',
   duration = 25,
   delay = 0,
@@ -40,7 +40,7 @@ export const AnimatedGradientBlob = React.memo(function AnimatedGradientBlob({
 
 export const GlowBackground = React.memo(function GlowBackground({ 
   className, 
-  color = colors.primaryGlow, 
+  color = 'rgba(193, 18, 31, 0.15)', 
   size = '800px', 
   ...props 
 }) {
@@ -53,7 +53,7 @@ export const GlowBackground = React.memo(function GlowBackground({
       style={{
         width: size,
         height: size,
-        background: `radial-gradient(circle, ${color} 0%, rgba(3, 7, 18, 0) 70%)`,
+        background: `radial-gradient(circle, ${color} 0%, rgba(13, 13, 13, 0) 70%)`,
       }}
       {...props}
     />
@@ -96,7 +96,7 @@ export const GridBackground = React.memo(function GridBackground({ className, si
   );
 });
 
-export const RadialGradient = React.memo(function RadialGradient({ className, from = 'transparent', to = '#030712', stop = '80%', ...props }) {
+export const RadialGradient = React.memo(function RadialGradient({ className, from = 'transparent', to = '#0D0D0D', stop = '80%', ...props }) {
   return (
     <div
       className={cn(

@@ -98,7 +98,7 @@ export const HoverBorder = React.memo(function HoverBorder({ className, children
       )}
       {...props}
     >
-      <div className="bg-slate-950/95 w-full h-full rounded-[11px] overflow-hidden">
+      <div className="bg-[#171717] w-full h-full rounded-[11px] overflow-hidden">
         {children}
       </div>
     </m.div>

@@ -11,7 +11,7 @@ export const Input = React.forwardRef(({
   return (
     <div className="w-full flex flex-col gap-1.5 text-left">
       {label && (
-        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider select-none">
+        <label className="text-xs font-semibold text-[#A8A8A8] uppercase tracking-wider select-none">
           {label}
         </label>
       )}
@@ -19,14 +19,14 @@ export const Input = React.forwardRef(({
         type={type}
         ref={ref}
         className={cn(
-          "w-full h-10 px-3.5 rounded-lg bg-white/[0.03] backdrop-blur-md border border-white/5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-glass-sm",
-          error && "border-destructive/50 focus:ring-destructive/50 focus:border-destructive/50",
+          "w-full h-10 px-3.5 rounded-lg bg-[#171717] border border-[#2A2A2A] text-sm text-[#F5F5F5] placeholder:text-[#A8A8A8]/60 focus:outline-none focus:ring-2 focus:ring-[#C1121F]/50 focus:border-[#C1121F] transition-all shadow-glass-sm",
+          error && "border-[#C1121F] focus:ring-[#C1121F]/50 focus:border-[#C1121F]",
           className
         )}
         {...props}
       />
       {error && (
-        <span className="text-xs text-destructive font-medium mt-0.5">
+        <span className="text-xs text-[#C1121F] font-medium mt-0.5">
           {error}
         </span>
       )}

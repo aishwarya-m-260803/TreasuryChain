@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '../../utils/cn';
 
 export const Table = React.forwardRef(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto rounded-lg border border-white/5 bg-slate-900/10 backdrop-blur-md">
+  <div className="relative w-full overflow-auto rounded-xl border border-[#2A2A2A] bg-[#171717]">
     <table
       ref={ref}
       className={cn("w-full caption-bottom text-sm border-collapse", className)}
@@ -13,7 +13,7 @@ export const Table = React.forwardRef(({ className, ...props }, ref) => (
 Table.displayName = "Table";
 
 export const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("bg-white/[0.02] border-b border-white/5", className)} {...props} />
+  <thead ref={ref} className={cn("bg-[#0D0D0D] border-b border-[#2A2A2A]", className)} {...props} />
 ));
 TableHeader.displayName = "TableHeader";
 
@@ -29,7 +29,7 @@ TableBody.displayName = "TableBody";
 export const TableFooter = React.forwardRef(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn("bg-slate-900/50 font-medium text-foreground border-t border-white/5", className)}
+    className={cn("bg-[#0D0D0D] font-medium text-[#F5F5F5] border-t border-[#2A2A2A]", className)}
     {...props}
   />
 ));
@@ -39,7 +39,7 @@ export const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      "border-b border-white/5 transition-all duration-200 hover:bg-white/[0.015] data-[state=selected]:bg-slate-800/50",
+      "border-b border-[#2A2A2A] transition-all duration-200 hover:bg-[#1F1F1F]",
       className
     )}
     {...props}
@@ -51,7 +51,7 @@ export const TableHead = React.forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle font-bold text-muted-foreground uppercase tracking-wider text-[10px] select-none",
+      "h-12 px-4 text-left align-middle font-bold text-[#A8A8A8] uppercase tracking-wider text-[10px] select-none",
       className
     )}
     {...props}
@@ -62,7 +62,7 @@ TableHead.displayName = "TableHead";
 export const TableCell = React.forwardRef(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn("p-4 align-middle text-foreground/90 font-medium", className)}
+    className={cn("p-4 align-middle text-[#F5F5F5] font-medium", className)}
     {...props}
   />
 ));

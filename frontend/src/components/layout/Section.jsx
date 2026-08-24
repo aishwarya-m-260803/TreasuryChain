@@ -12,9 +12,9 @@ export const Section = React.memo(function Section({
 }) {
   const backgrounds = {
     transparent: 'bg-transparent',
-    slate: 'bg-slate-950/30',
-    dark: 'bg-slate-950/60',
-    glow: 'bg-slate-950/15 shadow-glow-primary/5',
+    slate: 'bg-[#171717]/30',
+    dark: 'bg-[#0D0D0D]',
+    glow: 'bg-[#171717]/50 shadow-glow-primary/10',
   };
 
   return (
@@ -23,8 +23,8 @@ export const Section = React.memo(function Section({
         spacing.section.spacingY,
         "relative overflow-hidden w-full",
         backgrounds[variant] || backgrounds.transparent,
-        borderTop && "border-t border-white/5",
-        borderBottom && "border-b border-white/5",
+        borderTop && "border-t border-[#2A2A2A]",
+        borderBottom && "border-b border-[#2A2A2A]",
         className
       )}
       {...props}

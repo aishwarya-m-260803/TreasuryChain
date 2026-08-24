@@ -94,8 +94,8 @@ export function HistoryDetails() {
     timelineEvents.push({
         id: 'creation',
         icon: FileText,
-        color: 'text-blue-400',
-        bgColor: 'bg-blue-500/10',
+        color: 'text-[#E5383B]',
+        bgColor: 'bg-[#C1121F]/15',
         title: 'Proposal Created',
         desc: `Submitted by FinanceMSP (assumed) for ${formatCurrency(creationState.state.amount)}.`,
         time: formatTimestamp(creationState.timestamp)

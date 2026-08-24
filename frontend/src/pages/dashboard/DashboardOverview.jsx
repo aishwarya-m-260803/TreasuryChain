@@ -221,18 +221,18 @@ export function DashboardOverview() {
             .map(log => {
                 const r = log.Record;
                 const typeMap = {
-                    'PROPOSAL_CREATED': { icon: Plus, color: 'text-blue-400', bg: 'bg-blue-500/10', label: 'Proposal Created' },
+                    'PROPOSAL_CREATED': { icon: Plus, color: 'text-[#E5383B]', bg: 'bg-[#C1121F]/15', label: 'Proposal Created' },
                     'VOTE_CAST': { icon: Vote, color: 'text-primary', bg: 'bg-primary/10', label: 'Vote Cast' },
                     'PROPOSAL_APPROVED': { icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10', label: 'Proposal Approved' },
                     'PROPOSAL_REJECTED': { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10', label: 'Proposal Rejected' },
                     'RESERVE_DEDUCTION': { icon: DollarSign, color: 'text-amber-400', bg: 'bg-amber-500/10', label: 'Expense Released' },
-                    'EXPENSE_CREATED': { icon: Receipt, color: 'text-cyan-400', bg: 'bg-cyan-500/10', label: 'Expense Recorded' },
-                    'FUNDING_PROPOSAL_CREATED': { icon: Plus, color: 'text-blue-400', bg: 'bg-blue-500/10', label: 'Funding Requested' },
+                    'EXPENSE_CREATED': { icon: Receipt, color: 'text-[#E5383B]', bg: 'bg-[#C1121F]/15', label: 'Expense Recorded' },
+                    'FUNDING_PROPOSAL_CREATED': { icon: Plus, color: 'text-[#E5383B]', bg: 'bg-[#C1121F]/15', label: 'Funding Requested' },
                     'FUNDING_VOTE_CAST': { icon: Vote, color: 'text-primary', bg: 'bg-primary/10', label: 'Funding Vote' },
                     'FUNDING_PROPOSAL_APPROVED': { icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10', label: 'Funding Approved' },
                     'FUNDING_PROPOSAL_REJECTED': { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10', label: 'Funding Rejected' },
                     'RESERVE_ADDITION': { icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10', label: 'Funds Added' },
-                    'FUNDING_PROPOSAL_CONFIRMED': { icon: CheckCircle2, color: 'text-cyan-400', bg: 'bg-cyan-500/10', label: 'Funding Confirmed' }
+                    'FUNDING_PROPOSAL_CONFIRMED': { icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10', label: 'Funding Confirmed' }
                 };
                 const info = typeMap[r.eventType] || { icon: Activity, color: 'text-muted-foreground', bg: 'bg-white/5', label: r.eventType };
                 const ts = r.timestamp ? new Date(r.timestamp) : null;
@@ -263,11 +263,11 @@ export function DashboardOverview() {
         { label: 'Treasury Reserve', value: summary ? formatCurrency(summary.treasuryBalance) : '$—', icon: Landmark, iconBg: 'bg-primary/10', iconColor: 'text-primary', trend: null },
         { label: 'Funds Added', value: summary ? formatCurrency(summary.totalFundsAdded || 0) : '$—', icon: TrendingUp, iconBg: 'bg-emerald-500/10', iconColor: 'text-emerald-400' },
         { label: 'Pending Funding', value: summary?.pendingFundingProposals ?? '—', icon: Clock, iconBg: 'bg-amber-500/10', iconColor: 'text-amber-400' },
-        { label: 'Total Proposals', value: totalProposals, icon: FileText, iconBg: 'bg-blue-500/10', iconColor: 'text-blue-400' },
+        { label: 'Total Proposals', value: totalProposals, icon: FileText, iconBg: 'bg-[#C1121F]/15', iconColor: 'text-[#E5383B]' },
         { label: 'Pending Exp.', value: summary?.pendingProposals ?? '—', icon: Clock, iconBg: 'bg-amber-500/10', iconColor: 'text-amber-400' },
         { label: 'Approved Exp.', value: summary?.approvedProposals ?? '—', icon: CheckCircle2, iconBg: 'bg-emerald-500/10', iconColor: 'text-emerald-400' },
         { label: 'Expired Exp.', value: summary?.expiredProposals ?? 0, icon: XCircle, iconBg: 'bg-white/5 border border-white/5', iconColor: 'text-muted-foreground' },
-        { label: 'Total Expenses', value: summary?.totalExpenses ?? '—', icon: Receipt, iconBg: 'bg-cyan-500/10', iconColor: 'text-cyan-400' }
+        { label: 'Total Expenses', value: summary?.totalExpenses ?? '—', icon: Receipt, iconBg: 'bg-[#C1121F]/15', iconColor: 'text-[#E5383B]' }
     ];
 
     return (
@@ -586,9 +586,9 @@ export function DashboardOverview() {
                     </Link>
 
                     <Link to="/dashboard/expenses">
-                        <GlassCard className="p-5 flex flex-col items-center gap-3 hover:border-cyan-500/40 hover:bg-white/[0.02] transition-all cursor-pointer group text-center">
-                            <div className="p-3 bg-cyan-500/10 rounded-xl group-hover:bg-cyan-500/20 transition-colors">
-                                <Receipt className="h-6 w-6 text-cyan-400" />
+                        <GlassCard className="p-5 flex flex-col items-center gap-3 hover:border-[#C1121F]/40 hover:bg-white/[0.02] transition-all cursor-pointer group text-center border-[#2A2A2A]">
+                            <div className="p-3 bg-[#C1121F]/15 rounded-xl group-hover:bg-[#C1121F]/25 transition-colors">
+                                <Receipt className="h-6 w-6 text-[#E5383B]" />
                             </div>
                             <div>
                                 <div className="text-sm font-medium text-white">Expenses</div>

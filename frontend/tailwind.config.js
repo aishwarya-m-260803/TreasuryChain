@@ -56,14 +56,14 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["Outfit", "SFMono-Regular", "Consolas", "monospace"],
+        sans: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"],
+        mono: ["SFMono-Regular", "Consolas", "monospace"],
       },
       boxShadow: {
-        "glass-sm": "0 2px 8px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
-        "glass-md": "0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
-        "glass-lg": "0 12px 40px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
-        "glow-primary": "0 0 20px 0 rgba(99, 102, 241, 0.15)",
+        "glass-sm": "0 2px 8px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
+        "glass-md": "0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
+        "glass-lg": "0 12px 40px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
+        "glow-primary": "0 0 20px 0 rgba(193, 18, 31, 0.25)",
         "glow-success": "0 0 20px 0 rgba(16, 185, 129, 0.15)",
       },
       animation: {

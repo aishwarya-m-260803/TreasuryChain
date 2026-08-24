@@ -83,7 +83,7 @@ export function AuditLogsView() {
         if (!eventType) return <Badge variant="secondary">Unknown</Badge>;
         
         if (eventType.includes('PROPOSAL_CREATED')) return <Badge variant="success">Proposal Created</Badge>;
-        if (eventType.includes('VOTE_CAST')) return <Badge variant="outline" className="border-blue-500/30 text-blue-400 bg-blue-500/10">Vote Cast</Badge>;
+        if (eventType.includes('VOTE_CAST')) return <Badge variant="outline" className="border-[#C1121F]/40 text-[#E5383B] bg-[#C1121F]/15">Vote Cast</Badge>;
         if (eventType.includes('EXPENSE')) return <Badge variant="destructive">Expense</Badge>;
         
         return <Badge variant="secondary">{eventType}</Badge>;
@@ -139,8 +139,8 @@ export function AuditLogsView() {
 
                 <GlassCard className="p-6">
                     <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-blue-500/10 rounded-lg">
-                            <CheckCircle2 className="h-5 w-5 text-blue-400" />
+                        <div className="p-2 bg-[#C1121F]/15 rounded-lg border border-[#C1121F]/20">
+                            <CheckCircle2 className="h-5 w-5 text-[#E5383B]" />
                         </div>
                     </div>
                     <div className="text-2xl font-bold text-white mb-1">

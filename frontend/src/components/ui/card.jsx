@@ -17,7 +17,7 @@ export const Card = React.forwardRef(({
     <Component
       ref={ref}
       className={cn(
-        "rounded-xl bg-slate-900/40 border border-white/5 text-foreground shadow-sm overflow-hidden",
+        "rounded-xl bg-[#171717] border border-[#2A2A2A] text-[#F5F5F5] shadow-lg overflow-hidden",
         className
       )}
       {...animationProps}
@@ -47,7 +47,7 @@ export const GlassCard = React.forwardRef(({
       ref={ref}
       className={cn(
         glow ? "glass-panel-glow" : "glass-panel",
-        "rounded-xl overflow-hidden text-foreground transition-all duration-300",
+        "rounded-xl overflow-hidden text-[#F5F5F5] transition-all duration-300",
         className
       )}
       {...animationProps}
@@ -67,13 +67,13 @@ export const CardHeader = ({ className, children, ...props }) => (
 );
 
 export const CardTitle = ({ className, children, ...props }) => (
-  <h3 className={cn("text-lg font-bold tracking-tight text-white", className)} {...props}>
+  <h3 className={cn("text-lg font-bold tracking-tight text-[#F5F5F5]", className)} {...props}>
     {children}
   </h3>
 );
 
 export const CardDescription = ({ className, children, ...props }) => (
-  <p className={cn("text-sm text-muted-foreground", className)} {...props}>
+  <p className={cn("text-sm text-[#A8A8A8]", className)} {...props}>
     {children}
   </p>
 );
@@ -85,7 +85,7 @@ export const CardContent = ({ className, children, ...props }) => (
 );
 
 export const CardFooter = ({ className, children, ...props }) => (
-  <div className={cn("p-6 pt-0 flex items-center border-t border-white/5 mt-4", className)} {...props}>
+  <div className={cn("p-6 pt-0 flex items-center border-t border-[#2A2A2A] mt-4", className)} {...props}>
     {children}
   </div>
 );

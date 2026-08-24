@@ -14,11 +14,11 @@ export const Button = React.forwardRef(({
   const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:pointer-events-none cursor-pointer select-none';
   
   const variants = {
-    primary: 'bg-primary text-primary-foreground hover:bg-primary/95 shadow-glow-primary border border-primary/20',
-    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border',
-    glass: 'glass-panel text-foreground hover:bg-white/5 hover:border-white/15 hover:shadow-glow-primary',
-    outline: 'border border-border bg-transparent text-foreground hover:bg-secondary/50',
-    ghost: 'text-foreground hover:bg-secondary/50',
+    primary: 'bg-[#C1121F] text-[#F5F5F5] hover:bg-[#E5383B] shadow-glow-primary border border-[#E5383B]/40 active:bg-[#A00E1A]',
+    secondary: 'bg-[#171717] text-[#F5F5F5] hover:bg-[#1F1F1F] border border-[#2A2A2A]',
+    glass: 'bg-[#171717] text-[#F5F5F5] border border-[#2A2A2A] hover:bg-[#1F1F1F] hover:border-[#E5383B]/50 hover:shadow-glow-primary',
+    outline: 'border border-[#2A2A2A] bg-transparent text-[#F5F5F5] hover:bg-[#171717] hover:border-[#2A2A2A]',
+    ghost: 'text-[#F5F5F5] hover:bg-[#171717]',
   };
 
   const sizes = {

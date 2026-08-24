@@ -76,8 +76,8 @@ export function ReserveView() {
 
                 <GlassCard className="p-6">
                     <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-blue-500/10 rounded-lg">
-                            <Wallet className="h-5 w-5 text-blue-400" />
+                        <div className="p-2 bg-[#C1121F]/15 rounded-lg border border-[#C1121F]/20">
+                            <Wallet className="h-5 w-5 text-[#E5383B]" />
                         </div>
                     </div>
                     <div className="text-2xl font-bold text-white mb-1">

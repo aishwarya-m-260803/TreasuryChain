@@ -10,24 +10,24 @@ export function Badge({
   const baseStyles = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider select-none border transition-all duration-300';
   
   const variants = {
-    default: 'bg-primary/10 border-primary/20 text-primary shadow-glow-primary/10',
-    secondary: 'bg-secondary text-secondary-foreground border-border',
-    success: 'bg-success/10 border-success/20 text-success shadow-glow-success/10',
-    warning: 'bg-warning/10 border-warning/20 text-warning shadow-glow-warning/10',
-    destructive: 'bg-destructive/10 border-destructive/20 text-destructive shadow-glow-destructive/10',
-    outline: 'border border-border bg-transparent text-muted-foreground',
+    default: 'bg-[#C1121F]/15 border-[#C1121F]/30 text-[#F5F5F5] shadow-glow-primary',
+    secondary: 'bg-[#1F1F1F] text-[#A8A8A8] border-[#2A2A2A]',
+    success: 'bg-[#10B981]/15 border-[#10B981]/30 text-[#10B981]',
+    warning: 'bg-[#F59E0B]/15 border-[#F59E0B]/30 text-[#F59E0B]',
+    destructive: 'bg-[#C1121F]/20 border-[#C1121F]/40 text-[#E5383B]',
+    outline: 'border border-[#2A2A2A] bg-transparent text-[#A8A8A8]',
   };
 
   return (
     <span className={cn(baseStyles, variants[variant], className)} {...props}>
       <span className={cn(
         "h-1.5 w-1.5 rounded-full shrink-0",
-        variant === 'default' && "bg-primary animate-pulse",
-        variant === 'secondary' && "bg-muted-foreground",
-        variant === 'success' && "bg-success animate-pulse",
-        variant === 'warning' && "bg-warning animate-pulse",
-        variant === 'destructive' && "bg-destructive animate-pulse",
-        variant === 'outline' && "bg-muted-foreground/40"
+        variant === 'default' && "bg-[#C1121F] animate-pulse",
+        variant === 'secondary' && "bg-[#A8A8A8]",
+        variant === 'success' && "bg-[#10B981] animate-pulse",
+        variant === 'warning' && "bg-[#F59E0B] animate-pulse",
+        variant === 'destructive' && "bg-[#E5383B] animate-pulse",
+        variant === 'outline' && "bg-[#A8A8A8]/40"
       )} />
       {children}
     </span>
